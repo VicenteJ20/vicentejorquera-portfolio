@@ -122,6 +122,17 @@ body {
   background: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
+/* Standard content container — every page/section uses this exact width */
+.shell {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 72rem; /* matches max-w-6xl */
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  .shell { padding-inline: 2rem; }
+}
+
 .section-rule {
   border: none;
   border-top: 1px solid var(--line);

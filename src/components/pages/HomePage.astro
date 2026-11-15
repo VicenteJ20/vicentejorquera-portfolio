@@ -29,7 +29,8 @@ const certificationsPath = localizePath('/certifications/', lang);
 
 {/* ============ HERO ============ */}
 <section aria-label="Intro">
-  <div class="mx-auto max-w-3xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-14">
+  <div class="shell pb-14 pt-8 sm:pb-20 sm:pt-14">
+    <div class="max-w-3xl">
     <h1 class="font-display text-[clamp(2.6rem,9vw,4.2rem)] font-semibold leading-[1.02] tracking-tight text-ink">Vicente Jorquera</h1>
     <div class="mt-5 h-px w-full bg-line-strong" aria-hidden="true"></div>
 
@@ -69,11 +70,12 @@ const certificationsPath = localizePath('/certifications/', lang);
     <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
       <span class="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 align-middle" aria-hidden="true"></span>{copy.hero.location} · {copy.hero.availability}
     </p>
+    </div>
   </div>
 </section>
 
 {/* ============ 01 — LATEST WRITING ============ */}
-<section class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20" aria-labelledby="latest-heading">
+<section class="shell py-16 sm:py-20" aria-labelledby="latest-heading">
   <SectionHeader kicker={t('home.latestKicker')} title={t('home.latestTitle')} href={blog} hrefLabel={t('home.viewAll')} />
   {posts.length > 0 ? (
     <div class="border-t border-line">
@@ -86,7 +88,7 @@ const certificationsPath = localizePath('/certifications/', lang);
 
 {/* ============ 02 — PRODUCTS ============ */}
 <section class="border-t border-line bg-surface/30" aria-labelledby="products-heading">
-  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+  <div class="shell py-16 sm:py-20">
     <SectionHeader kicker={t('home.productsKicker')} title={t('home.productsTitle')} href={productsPath} hrefLabel={t('nav.products')} />
     {products.length > 0 ? (
       <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -119,7 +121,7 @@ const certificationsPath = localizePath('/certifications/', lang);
 </section>
 
 {/* ============ 03 — TRAJECTORY ============ */}
-<section class="mx-auto max-w-6xl border-t border-line px-5 py-16 sm:px-8 sm:py-20" aria-labelledby="experience-heading">
+<section class="shell border-t border-line py-16 sm:py-20" aria-labelledby="experience-heading">
   <SectionHeader kicker={t('home.experienceKicker')} title={t('home.experienceTitle')} />
   <ol class="relative ml-1 space-y-9 border-l border-line-strong pl-7 sm:pl-9">
     {experience.map((item) => (
@@ -149,7 +151,7 @@ const certificationsPath = localizePath('/certifications/', lang);
 
 {/* ============ 04 — CERTIFICATIONS ============ */}
 <section class="border-t border-line" aria-labelledby="certifications-heading">
-  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+  <div class="shell py-16 sm:py-20">
     <SectionHeader kicker={t('home.certsKicker')} title={t('home.certsTitle')} href={certificationsPath} hrefLabel={t('home.certsViewAll')} />
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {certifications.map((cert) => <CertCard cert={cert} lang={lang} />)}
