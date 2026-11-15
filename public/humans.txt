@@ -1,0 +1,12 @@
+/* vicentejorquera.dev — humans.txt */
+
+Vicente Jorquera
+Software Architect — Architecture & AI Consulting
+Chile (UTC-3/4)
+
+Site: https://vicentejorquera.dev
+Mail: hola@vicentejorquera.dev
+GitHub: https://github.com/vicentejorquera
+
+Built with: Astro, Tailwind CSS, Markdown-first. No CMS.
+Made with care in Chile.
