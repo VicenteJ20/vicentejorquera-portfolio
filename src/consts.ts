@@ -23,8 +23,8 @@ export const SITE = {
     es: { htmlLang: 'es', ogLocale: 'es_CL' },
   },
   // ⚠️ PLACEHOLDERS — change me
-  email: 'hola@vicentejorquera.dev',
-  github: 'https://github.com/vicentejorquera',
+  email: 'contacto@vicentejorquera.dev',
+  github: 'https://github.com/VicenteJ20',
   linkedin: 'https://www.linkedin.com/in/vicentejorquera',
   // Where the RSS feeds point to
   rss: { en: '/rss.xml', es: '/es/rss.xml' },

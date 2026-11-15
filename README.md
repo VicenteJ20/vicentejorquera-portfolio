@@ -112,8 +112,8 @@ name: "my-cli"
 tagline: "One-line pitch shown on the card."
 description: "2–3 sentences shown on the detail page and in OG/meta tags."
 stack: ["Rust", "TypeScript"]
-repo: "https://github.com/vicentejorquera/my-cli"
-download: "https://github.com/vicentejorquera/my-cli/releases/latest"   # or omit
+repo: "https://github.com/VicenteJ20/my-cli"
+download: "https://github.com/VicenteJ20/my-cli/releases/latest"   # or omit
 website: "https://my-cli.dev"                                          # or omit
 released: 2026-12-01
 ---
