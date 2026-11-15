@@ -64,7 +64,7 @@ export const ui = {
     blog: {
       kicker: '// writing',
       title: 'The Blog',
-      subtitle: 'Notes on software architecture, AI, cloud and the craft of building. Long-form, no fluff.',
+      subtitle: 'Notes on software architecture, AI, cloud and the craft of building',
       emptyTitle: 'No articles yet.',
       emptyBody: 'First post is being written. Subscribe via RSS to know when it lands.',
       filterByTag: 'Filter by tag',
@@ -178,7 +178,7 @@ export const ui = {
     blog: {
       kicker: '// escritura',
       title: 'El Blog',
-      subtitle: 'Notas sobre arquitectura de software, IA, cloud y el oficio de construir. Ensayo largo, cero relleno.',
+      subtitle: 'Notas sobre arquitectura de software, IA, cloud y el arte de construir.',
       emptyTitle: 'Aún no hay artículos.',
       emptyBody: 'El primer artículo está en camino. Suscríbete vía RSS para enterarte.',
       filterByTag: 'Filtrar por etiqueta',

@@ -167,9 +167,9 @@ if (jsonLd) ldBlocks.push(...(Array.isArray(jsonLd) ? jsonLd : [jsonLd]));
     )}
   </head>
 
-  <body class="min-h-screen bg-bg font-sans text-ink antialiased">
+  <body class="flex min-h-dvh flex-col bg-bg font-sans text-ink antialiased">
     <Header lang={lang} alternates={alts} />
-    <main id="main">
+    <main id="main" class="flex-1">
       <slot />
     </main>
     <Footer lang={lang} />

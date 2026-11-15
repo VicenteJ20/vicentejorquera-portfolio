@@ -342,6 +342,7 @@ body {
   margin: 1.3em 0;
   padding-left: 1.5em;
 }
+.post-body ol { list-style: decimal; }
 .post-body li { margin: 0.4em 0; padding-left: 0.2em; }
 .post-body ul li::marker { content: "▪  "; color: var(--accent); }
 .post-body ol li::marker { color: var(--accent); font-family: var(--font-mono); font-size: 0.9em; }
