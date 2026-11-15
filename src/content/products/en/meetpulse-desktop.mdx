@@ -1,0 +1,51 @@
+---
+name: "MeetPulse Desktop"
+tagline: "Transcribe and analyze your meetings on your machine, no bots or guests."
+description: "Windows desktop app that captures system and microphone audio, transcribes with local AI (Parakeet/Whisper) or cloud models via Vercel AI Gateway, and summarizes decisions and action items."
+stack: ["Rust", "Tauri", "Next.js", "TypeScript"]
+repo: "https://github.com/VicenteJ20/meetpulse-app"
+download: "https://github.com/VicenteJ20/meetpulse-app/releases/latest/download/MeetPulse_x64-setup.exe"
+website: "https://meetpulse.vicentejorquera.dev/"
+released: 2026-11-01
+draft: false
+---
+import { Image } from 'astro:assets';
+import hero from '../../../assets/products/meetpulse-desktop/Meetpulse-landing-en.webp';
+
+<Image src={hero} alt="MeetPulse Desktop in English: transcript with participants and a summary with decisions and action items, saved on this device" width={1200} loading="eager" />
+
+## What it does
+
+MeetPulse Desktop turns your meetings into searchable memory. It captures both your system audio and your microphone — works with Meet, Zoom, Teams or a phone call — with no bots or extensions joining the call.
+
+- **Live transcription**: local Parakeet and Whisper (Whisper covers ~100 languages), or optional cloud transcription with Gemini and MAI-Transcribe.
+- **Local-first AI**: Qwen 3.5 2B and Gemma 4 E4B run summaries, chat and coach fully offline. Nothing leaves your machine.
+- **Optional cloud via Vercel AI Gateway**: a single API key of yours covers transcription, analysis and chat, with ZDR / No-Training models depending on the provider.
+- **Automatic insights**: summary, decisions, action items with owners, topics and risks — every point links to the exact minute.
+- **Meety**: an assistant that answers questions about one meeting or a client's whole history, with clickable citations.
+- **Local semantic search** (Ctrl+K): find what was said, not just what you typed.
+- **PDF reports**: summary and transcript, generated on your machine.
+- **Real privacy control**: you choose per task what leaves your PC (all local / text only to the cloud / audio and text to the cloud).
+- Spanish and English UI.
+
+## Platform
+
+Windows 10/11 (64-bit) · macOS and Linux coming soon. Free, with no meeting or hour limits.
+
+## Install
+
+1. Download the Windows installer (download link above).
+2. Open MeetPulse and follow the welcome flow: audio permissions and model download.
+3. Hit **Record** on the Home screen.
+
+Cloud models require your own Vercel AI Gateway API key; the app doesn't ship one.
+
+> Installers are not digitally signed yet. If Windows SmartScreen warns you, click "More info" and then "Run anyway".
+
+## Links
+
+- [Landing page](https://meetpulse.vicentejorquera.dev/)
+- [GitHub repository](https://github.com/VicenteJ20/meetpulse-app)
+- [All releases](https://github.com/VicenteJ20/meetpulse-app/releases)
+
+MeetPulse is based on the open-source project [Meetily](https://github.com/Zackriya-Solutions/meetily) (MIT license).

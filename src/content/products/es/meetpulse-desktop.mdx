@@ -1,0 +1,51 @@
+---
+name: "MeetPulse Desktop"
+tagline: "Transcribe y analiza tus reuniones en tu equipo, sin bots ni invitados."
+description: "App de escritorio para Windows que graba el audio del sistema y del micrófono, transcribe con IA local (Parakeet/Whisper) o en la nube vía Vercel AI Gateway, y resume decisiones y tareas."
+stack: ["Rust", "Tauri", "Next.js", "TypeScript"]
+repo: "https://github.com/VicenteJ20/meetpulse-app"
+download: "https://github.com/VicenteJ20/meetpulse-app/releases/latest/download/MeetPulse_x64-setup.exe"
+website: "https://meetpulse.vicentejorquera.dev/"
+released: 2026-11-01
+draft: false
+---
+import { Image } from 'astro:assets';
+import hero from '../../../assets/products/meetpulse-desktop/Meetpulse-landing-es.webp';
+
+<Image src={hero} alt="MeetPulse Desktop en español: transcripción con participantes y resumen con decisiones y acciones, guardado en este equipo" width={1200} loading="eager" />
+
+## Qué hace
+
+MeetPulse Desktop convierte tus reuniones en memoria consultable. Graba el audio de tu equipo y tu micrófono a la vez — funciona con Meet, Zoom, Teams o una llamada telefónica — sin bots ni extensiones en la llamada.
+
+- **Transcripción en vivo**: Parakeet y Whisper locales (Whisper cubre ~100 idiomas), o Gemini y MAI-Transcribe en la nube, opcionales.
+- **IA local primero**: Qwen 3.5 2B y Gemma 4 E4B resumen, chat y coach funcionan sin conexión. Nada sale de tu equipo.
+- **Nube opcional vía Vercel AI Gateway**: una sola clave API tuya cubre transcripción, análisis y chat, con modelos ZDR / No Training según el proveedor.
+- **Insights automáticos**: resumen, decisiones, acciones con responsable, temas y riesgos — cada punto enlaza al minuto exacto.
+- **Meety**: asistente que responde preguntas sobre una reunión o todo el historial de un cliente, con citas clicables.
+- **Búsqueda semántica local** (Ctrl+K): encuentra lo que se dijo, no solo lo que escribiste.
+- **Informes PDF**: resumen y transcripción, generados en tu equipo.
+- **Privacidad real**: tú decides por tarea qué sale de tu PC (todo local / solo texto a la nube / audio y texto a la nube).
+- Español e inglés en la interfaz.
+
+## Plataforma
+
+Windows 10/11 (64 bits) · macOS y Linux, próximamente. Gratis, sin límite de reuniones ni de horas.
+
+## Instalación
+
+1. Descarga el instalador para Windows (enlace de descarga arriba).
+2. Abre MeetPulse y sigue la bienvenida: permisos de audio y descarga de un modelo.
+3. Pulsa **Grabar** en Inicio.
+
+Los modelos de nube necesitan tu propia clave de Vercel AI Gateway; la app no la incluye.
+
+> Los instaladores no tienen firma digital por ahora. Si Windows SmartScreen avisa, pulsa «Más información» y luego «Ejecutar de todos modos».
+
+## Links
+
+- [Landing page](https://meetpulse.vicentejorquera.dev/)
+- [Repositorio en GitHub](https://github.com/VicenteJ20/meetpulse-app)
+- [Todas las versiones (Releases)](https://github.com/VicenteJ20/meetpulse-app/releases)
+
+MeetPulse se basa en el proyecto de código abierto [Meetily](https://github.com/Zackriya-Solutions/meetily) (licencia MIT).
