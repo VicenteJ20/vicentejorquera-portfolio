@@ -33,6 +33,24 @@ export const certifications: Certification[] = [
     image: '/certs/github-copilot.svg',
   },
   {
+    id: 'aws-ml-foundations',
+    name: 'AWS Academy Machine Learning Foundations',
+    issuer: 'AWS Academy',
+    year: 2025, // ⚠️ placeholder
+    verifyUrl: undefined,
+    credentialId: undefined,
+    image: '/imgs/aws-academy-machine-learning-foundations.png',
+  },
+  {
+    id: 'aws-partner',
+    name: 'AWS Partner Technical Accredited',
+    issuer: 'AWS',
+    year: 2025, // ⚠️ placeholder
+    verifyUrl: undefined,
+    credentialId: undefined,
+    image: '/imgs/aws-partner-technical-accredited.png',
+  },
+  {
     id: 'google-ai-professional',
     name: 'Google AI Professional',
     issuer: 'Google',
