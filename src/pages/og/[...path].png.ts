@@ -79,34 +79,34 @@ export const GET: APIRoute = async ({ props }) => {
       <path d="M 46 0 H 0 V 46" fill="none" stroke="rgba(233,231,222,0.06)" stroke-width="1"/>
     </pattern>
     <radialGradient id="glow" cx="0.8" cy="0.1" r="0.9">
-      <stop offset="0" stop-color="#e3a857" stop-opacity="0.2"/>
-      <stop offset="1" stop-color="#e3a857" stop-opacity="0"/>
+      <stop offset="0" stop-color="#b3c16b" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#b3c16b" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="accentBar" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#e3a857"/>
-      <stop offset="1" stop-color="#e3a857" stop-opacity="0"/>
+      <stop offset="0" stop-color="#b3c16b"/>
+      <stop offset="1" stop-color="#b3c16b" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
-  <rect width="1200" height="630" fill="#101014"/>
+  <rect width="1200" height="630" fill="#131416"/>
   <rect width="1200" height="630" fill="url(#grid)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
   <rect x="0" y="0" width="1200" height="3" fill="url(#accentBar)"/>
 
   <!-- Kicker row -->
-  <rect x="72" y="88" width="14" height="14" fill="#e3a857"/>
-  <text x="98" y="100" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="4" fill="#e3a857">${esc(kicker)}</text>
+  <rect x="72" y="88" width="14" height="14" fill="#b3c16b"/>
+  <text x="98" y="100" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="4" fill="#b3c16b">${esc(kicker)}</text>
 
   <!-- Title -->
   ${titleSvg}
 
   <!-- Tags -->
-  <text x="72" y="${Math.min(tagsY, 480)}" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="21" letter-spacing="1" fill="#e3a857" fill-opacity="0.9">${esc(tagsLine)}</text>
+  <text x="72" y="${Math.min(tagsY, 480)}" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="21" letter-spacing="1" fill="#b3c16b" fill-opacity="0.9">${esc(tagsLine)}</text>
 
   <!-- Footer row -->
   <line x1="72" y1="540" x2="1128" y2="540" stroke="rgba(233,231,222,0.14)" stroke-width="1"/>
-  <rect x="72" y="558" width="34" height="34" rx="8" fill="#e3a857"/>
-  <text x="89" y="582" font-family="Georgia, 'DejaVu Serif', serif" font-weight="700" font-size="21" fill="#231503" text-anchor="middle">V</text>
+  <rect x="72" y="558" width="34" height="34" rx="8" fill="#b3c16b"/>
+  <text x="89" y="582" font-family="Georgia, 'DejaVu Serif', serif" font-weight="700" font-size="21" fill="#1e2410" text-anchor="middle">V</text>
   <text x="126" y="581" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="1" fill="#a3a199">VICENTE JORQUERA</text>
   <text x="1128" y="581" text-anchor="end" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="1" fill="#a3a199">vicentejorquera.dev</text>
 </svg>`;
