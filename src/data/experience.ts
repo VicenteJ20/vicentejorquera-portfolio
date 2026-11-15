@@ -111,10 +111,12 @@ export const experience: ExperienceItem[] = [
       en: [
         'Built and shipped full-stack features: APIs, data modeling and web UIs.',
         'CI/CD pipelines and cloud deployments for client projects.',
+        'Dot NET Development mantaining the company ticket system'
       ],
       es: [
         'Construí y publiqué funcionalidades full-stack: APIs, modelado de datos y UIs web.',
         'Pipelines CI/CD y despliegues cloud para proyectos de clientes.',
+        'Desarrollo .NET manteniendo el sistema de tickets de la empresa.'
       ],
     },
   },
@@ -128,11 +130,11 @@ export interface EducationItem {
 
 export const education: EducationItem[] = [
   {
-    degree: { en: 'Computer Engineering (B.Eng. equivalent)', es: 'Ingeniería en Informática' },
+    degree: { en: 'Education - Computer Engineering (B.Eng. equivalent)', es: 'Educación - Ingeniería en Informática' },
     school: 'INACAP',
   },
   {
-    degree: { en: 'Programming Analyst — Technical Degree', es: 'Analista Programador — Título Técnico' },
+    degree: { en: 'Education - Programming Analyst — Technical Degree', es: 'Educación - Analista Programador — Título Técnico' },
     school: 'INACAP',
   },
 ];
