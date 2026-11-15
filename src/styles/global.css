@@ -251,12 +251,9 @@ body {
 }
 .skip-link:focus { left: 0.75rem; }
 
-/* Header */
+/* Header — blends with the page, no bar/box separating it */
 .site-header {
-  background: var(--header-bg);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border-bottom: 1px solid var(--line);
+  border-bottom: none;
 }
 
 .nav-link {

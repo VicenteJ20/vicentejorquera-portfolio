@@ -4,7 +4,7 @@
  * All copy localized; all placeholder data marked in src/data/.
  */
 import { SITE, type Lang } from '../../consts';
-import { useTranslations } from '../../i18n/ui';
+import { ui, useTranslations } from '../../i18n/ui';
 import { getPosts, getProducts, localizePath } from '../../utils/content';
 import { experience, education } from '../../data/experience';
 import { certifications } from '../../data/certifications';
@@ -17,6 +17,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+const copy = ui[lang];
 
 const posts = (await getPosts(lang)).slice(0, 3);
 const products = await getProducts(lang);
@@ -27,51 +28,47 @@ const certificationsPath = localizePath('/certifications/', lang);
 ---
 
 {/* ============ HERO ============ */}
-<section class="blueprint relative overflow-hidden border-b border-line">
-  <div class="mx-auto grid max-w-6xl gap-12 px-5 pb-16 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:pb-24">
-    <div class="lg:col-span-7">
-      <p class="kicker">{t('hero.kicker')}</p>
-      <h1 class="mt-5 font-display font-semibold leading-[1.02] tracking-tight text-ink">
-        <span class="block text-[clamp(2.7rem,7.2vw,4.4rem)]">{t('hero.line1')}</span>
-        <span class="block text-[clamp(2.7rem,7.2vw,4.4rem)] italic text-accent">{t('hero.line2')}</span>
-      </h1>
-      <p class="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">{t('hero.tagline')}</p>
+<section aria-label="Intro">
+  <div class="mx-auto max-w-3xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-14">
+    <h1 class="font-display text-[clamp(2.6rem,9vw,4.2rem)] font-semibold leading-[1.02] tracking-tight text-ink">Vicente Jorquera</h1>
+    <div class="mt-5 h-px w-full bg-line-strong" aria-hidden="true"></div>
 
-      <div class="mt-8 flex flex-wrap items-center gap-3">
-        <a href={blog} class="btn btn-primary">{t('hero.ctaPrimary')}
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-        </a>
-        <a href={`mailto:${SITE.email}`} class="btn btn-ghost">{t('hero.ctaSecondary')}</a>
+    <p class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[15px] font-medium text-ink-soft sm:text-lg">
+      <span>{copy.hero.role}</span>
+      <span aria-hidden="true" class="text-muted">|</span>
+      <span>{copy.hero.practice}</span>
+      <span aria-hidden="true" class="text-muted">|</span>
+      <a href={SITE.linkedin} target="_blank" rel="me noopener" class="font-semibold text-accent underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-accent">{copy.hero.linkedinLabel}</a>
+    </p>
+
+    <p class="mt-6 max-w-2xl text-[17px] leading-relaxed text-ink-soft">{copy.hero.bio}</p>
+
+    <p class="mt-10 text-sm font-semibold text-ink">{copy.hero.focusTitle}</p>
+    <ul class="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-ink-soft marker:text-accent">
+      {copy.hero.focusAreas.map((area) => <li>{area}</li>)}
+    </ul>
+
+    <div class="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-5 border-t border-line pt-6">
+      <div class="flex items-center gap-2">
+        {certifications.map((cert) => {
+          const monogram = cert.issuer.split(/[\s&-]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+          return (
+            <a href={certificationsPath} title={`${cert.name} — ${cert.issuer}`} aria-label={`${cert.name} — ${cert.issuer}`}
+               class="mono-tile h-11 w-11 rounded-lg font-display text-[13px] font-semibold no-underline transition-transform hover:-translate-y-0.5">
+              <span class="relative z-10 tracking-tight">{monogram}</span>
+            </a>
+          );
+        })}
       </div>
-
-      <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted">
-        <span class="inline-flex items-center gap-2">
-          <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span></span>
-          {t('hero.availability')}
-        </span>
-        <span>{t('hero.location')} · UTC-3/4</span>
-      </div>
-    </div>
-
-    {/* Architect's card — typographic, no photo required */}
-    <div class="lg:col-span-5">
-      <div class="relative mx-auto max-w-sm select-none" aria-hidden="true">
-        <div class="absolute -inset-3 rounded-3xl border border-line bg-surface/60 blur-[1px]"></div>
-        <div class="blueprint relative rounded-2xl border border-line-strong bg-surface p-7 shadow-[var(--shadow)]">
-          <div class="flex items-start justify-between">
-            <svg viewBox="0 0 40 40" width="46" height="46"><rect width="40" height="40" rx="9" fill="var(--accent)"/><text x="20" y="27.5" text-anchor="middle" font-family="'Fraunces Variable', Georgia, serif" font-weight="650" font-size="23" fill="var(--btn-ink)">V</text></svg>
-            <p class="text-right font-mono text-[9px] uppercase leading-relaxed tracking-[0.22em] text-muted">vicente<br/>jorquera</p>
-          </div>
-          <p class="mt-8 font-display text-[5.2rem] font-semibold leading-none tracking-tighter text-ink">V<span class="text-accent">J</span></p>
-          <div class="mt-8 space-y-2.5 border-t border-line pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
-            <div class="flex justify-between gap-4"><span>role</span><span class="text-right text-ink-soft">{t('hero.cardCaption').split('·')[0].trim()}</span></div>
-            <div class="flex justify-between gap-4"><span>focus</span><span class="text-right text-ink-soft">cloud · ai · arch</span></div>
-            <div class="flex justify-between gap-4"><span>based</span><span class="text-right text-ink-soft">chile · utc-3/4</span></div>
-            <div class="flex justify-between gap-4"><span>url</span><span class="text-right text-accent">vicentejorquera.dev</span></div>
-          </div>
-        </div>
+      <div class="flex items-center gap-5">
+        <a href={blog} class="link-arrow">{copy.hero.blogLabel} <span aria-hidden="true">→</span></a>
+        <a href={`mailto:${SITE.email}`} class="link-arrow">{copy.hero.helloLabel} <span aria-hidden="true">→</span></a>
       </div>
     </div>
+
+    <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+      <span class="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 align-middle" aria-hidden="true"></span>{copy.hero.location} · {copy.hero.availability}
+    </p>
   </div>
 </section>
 

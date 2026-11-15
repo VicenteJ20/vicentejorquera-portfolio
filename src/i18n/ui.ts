@@ -27,18 +27,23 @@ export const ui = {
       rss: 'RSS',
     },
     hero: {
-      kicker: '// software architect — architecture & ai consulting',
-      /** ⚠️ PLACEHOLDER headline — make it yours */
-      line1: 'I design architectures',
-      line2: 'that ship to production.',
-      tagline:
-        'Vicente Jorquera — I help teams design cloud architectures and take AI from prototype to production, and I write about what actually works.',
-      ctaPrimary: 'Read the blog',
-      ctaSecondary: 'Get in touch',
+      role: 'Software Architect',
+      practice: 'Architecture & AI Consulting',
+      linkedinLabel: 'LinkedIn',
+      bio: "I'm a software architect on an Architecture & AI consulting team. I design cloud architectures and take AI from prototype to production — and I write about what actually works.",
+      focusTitle: 'Focus areas:',
+      // ⚠️ Edit to match what you actually do
+      focusAreas: [
+        'AI/ML solutions and MLOps automation',
+        'Cloud migration & application modernization',
+        'Software architecture, ADRs and platform standards',
+        'Full-stack delivery — APIs, data and CI/CD',
+        'Client PoCs: architecture → production',
+      ],
+      blogLabel: 'Read the blog',
+      helloLabel: 'Say hello',
       location: 'Based in Chile',
       availability: 'Open to interesting conversations',
-      cardCaption: 'software architect · 24 · chile',
-      cardRole: 'architecture & ai consulting',
     },
     home: {
       latestKicker: '// 01 — writing',
@@ -136,17 +141,23 @@ export const ui = {
       rss: 'RSS',
     },
     hero: {
-      kicker: '// arquitecto de software — consultoría de arquitectura e ia',
-      line1: 'Diseño arquitecturas',
-      line2: 'que llegan a producción.',
-      tagline:
-        'Vicente Jorquera — Ayudo a equipos a diseñar arquitecturas cloud y a llevar la IA de prototipo a producción, y escribo sobre lo que realmente funciona.',
-      ctaPrimary: 'Leer el blog',
-      ctaSecondary: 'Conversemos',
+      role: 'Arquitecto de Software',
+      practice: 'Consultoría de Arquitectura e IA',
+      linkedinLabel: 'LinkedIn',
+      bio: 'Soy arquitecto de software en un equipo de consultoría de Arquitectura e IA. Diseño arquitecturas cloud y llevo la IA de prototipo a producción — y escribo sobre lo que realmente funciona.',
+      focusTitle: 'Áreas de foco:',
+      // ⚠️ Edítalas para que reflejen tu día a día real
+      focusAreas: [
+        'Soluciones AI/ML y automatización de MLOps',
+        'Migración cloud y modernización de aplicaciones',
+        'Arquitectura de software, ADRs y estándares de plataforma',
+        'Entrega full-stack — APIs, datos y CI/CD',
+        'PoCs para clientes: de la arquitectura a producción',
+      ],
+      blogLabel: 'Leer el blog',
+      helloLabel: 'Conversemos',
       location: 'Basado en Chile',
       availability: 'Abierto a conversaciones interesantes',
-      cardCaption: 'arquitecto de software · 24 · chile',
-      cardRole: 'consultoría de arquitectura e ia',
     },
     home: {
       latestKicker: '// 01 — escritura',
