@@ -18,7 +18,7 @@ const monogram = cert.image
 
 <div class="card card-hover flex items-center gap-5 p-5">
   {cert.image ? (
-    <img src={cert.image} alt={`${cert.name} — ${cert.issuer}`} class="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20" loading="lazy" decoding="async" />
+    <img src={cert.image} alt={`${cert.name} — ${cert.issuer}`} class="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20" decoding="async" />
   ) : (
     <div class:list={['mono-tile shrink-0 select-none rounded-2xl font-display font-semibold', large ? 'h-20 w-20 text-2xl sm:h-24 sm:w-24 sm:text-3xl' : 'h-16 w-16 text-xl']} aria-hidden="true">
       <span class="relative z-10 tracking-tight">{monogram}</span>

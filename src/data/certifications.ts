@@ -30,6 +30,7 @@ export const certifications: Certification[] = [
     year: 2025, // ⚠️ placeholder
     verifyUrl: undefined, // e.g. 'https://learn.microsoft.com/.../credentials/xxxx'
     credentialId: undefined,
+    image: '/certs/github-copilot.svg',
   },
   {
     id: 'google-ai-professional',
@@ -38,6 +39,7 @@ export const certifications: Certification[] = [
     year: 2025, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
+    image: '/imgs/google-ai-professional-certificate.png',
   },
   {
     id: 'inacap-cloud',
@@ -46,6 +48,7 @@ export const certifications: Certification[] = [
     year: 2024, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
+    image: '/imgs/inacap-2.webp',
   },
   {
     id: 'inacap-fullstack',
@@ -54,5 +57,6 @@ export const certifications: Certification[] = [
     year: 2024, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
+    image: '/imgs/inacap-2.webp',
   },
 ];
