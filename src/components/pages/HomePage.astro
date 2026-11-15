@@ -55,11 +55,11 @@ const certificationsPath = localizePath('/certifications/', lang);
           const monogram = cert.issuer.split(/[\s&-]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
           return (
             <a href={certificationsPath} title={`${cert.name} — ${cert.issuer}`} aria-label={`${cert.name} — ${cert.issuer}`}
-               class="mono-tile block h-11 w-11 overflow-hidden rounded-lg no-underline transition-transform hover:-translate-y-0.5 sm:h-12 sm:w-12">
+               class="block h-[48px] w-[48px] no-underline transition-transform hover:-translate-y-0.5 sm:h-[53px] sm:w-[53px]">
               {cert.image ? (
-                <img src={cert.image} alt="" class="relative z-10 h-full w-full object-contain p-1" decoding="async" />
+                <img src={cert.image} alt="" width="53" height="53" class="h-full w-full object-contain" decoding="async" />
               ) : (
-                <span class="relative z-10 font-display text-[13px] font-semibold tracking-tight">{monogram}</span>
+                <span class="mono-tile flex h-full w-full items-center justify-center rounded-xl font-display text-[15px] font-semibold tracking-tight">{monogram}</span>
               )}
             </a>
           );
