@@ -1,0 +1,25 @@
+---
+import type { Lang } from '../../consts';
+import { useTranslations } from '../../i18n/ui';
+import { getPosts, tagSlug } from '../../utils/content';
+import PostCard from '../PostCard.astro';
+
+interface Props {
+  lang: Lang;
+  tag: string; // slugified tag
+}
+const { lang, tag } = Astro.props;
+const t = useTranslations(lang);
+
+const posts = (await getPosts(lang)).filter((post) => post.data.tags.some((tagItem) => tagSlug(tagItem) === tag));
+---
+
+<section class="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
+  <p class="kicker">{t('common.tags')}</p>
+  <h1 class="mt-4 font-display text-5xl font-semibold tracking-tight text-ink sm:text-6xl">#{tag}</h1>
+  <p class="mt-4 font-mono text-[11px] uppercase tracking-[0.2em] text-muted">{posts.length} {t('blog.postsTagged')}</p>
+
+  <div class="mt-10 border-t border-line">
+    {posts.map((post) => <PostCard post={post} lang={lang} />)}
+  </div>
+</section>

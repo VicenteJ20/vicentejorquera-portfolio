@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArchivePage from '../../components/pages/ArchivePage.astro';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations('es');
+---
+
+<BaseLayout lang="es" title={t('blog.archive')} description={t('meta.archiveDescription')}>
+  <ArchivePage lang="es" />
+</BaseLayout>

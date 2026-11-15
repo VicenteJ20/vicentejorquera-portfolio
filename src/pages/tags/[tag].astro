@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagPage from '../../components/pages/TagPage.astro';
+import { useTranslations } from '../../i18n/ui';
+import { collectTags, getPosts } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const posts = await getPosts('en');
+  return [...collectTags(posts).keys()].map((tag) => ({ params: { tag } }));
+}
+
+const t = useTranslations('en');
+const { tag } = Astro.params;
+---
+
+<BaseLayout lang="en" title={`#${tag}`} description={t('meta.tagsDescription')}>
+  <TagPage lang="en" tag={tag} />
+</BaseLayout>

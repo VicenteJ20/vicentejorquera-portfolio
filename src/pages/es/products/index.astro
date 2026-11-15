@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProductsIndexPage from '../../../components/pages/ProductsIndexPage.astro';
+import { useTranslations } from '../../../i18n/ui';
+
+const t = useTranslations('es');
+---
+
+<BaseLayout lang="es" title={t('products.title')} description={t('meta.productsDescription')}>
+  <ProductsIndexPage lang="es" />
+</BaseLayout>

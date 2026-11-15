@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProductDetailPage from '../../../components/pages/ProductDetailPage.astro';
+import { useTranslations } from '../../../i18n/ui';
+import { getProducts, slugOf } from '../../../utils/content';
+
+export async function getStaticPaths() {
+  const products = await getProducts('es');
+  const enSlugs = new Set((await getProducts('en')).map(slugOf));
+  return products.map((product) => {
+    const slug = slugOf(product);
+    return {
+      params: { slug },
+      props: {
+        product,
+        alternates: {
+          es: `/es/products/${slug}/`,
+          en: enSlugs.has(slug) ? `/products/${slug}/` : '/products/',
+        },
+      },
+    };
+  });
+}
+
+const { product, alternates } = Astro.props;
+---
+
+<BaseLayout lang="es" title={product.data.name} description={product.data.description} alternates={alternates}>
+  <ProductDetailPage lang="es" product={product} />
+</BaseLayout>

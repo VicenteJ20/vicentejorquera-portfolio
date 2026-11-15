@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localizePath } from '../utils/content';
+---
+
+<BaseLayout lang="en" title="404" noindex alternates={{ en: '/404' }}>
+  <section class="blueprint border-b border-line">
+    <div class="mx-auto flex min-h-[60vh] max-w-6xl flex-col items-center justify-center px-5 py-24 text-center sm:px-8">
+      <p class="kicker">// 404</p>
+      <h1 class="mt-4 font-display text-6xl font-semibold tracking-tight text-ink sm:text-7xl">Lost in<br /><span class="italic text-accent">transit.</span></h1>
+      <p class="mt-6 max-w-md text-muted">This route doesn’t exist — Página no encontrada.<br />Maybe it moved, or never shipped.</p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a href={localizePath('/', 'en')} class="btn btn-primary">Home</a>
+        <a href={localizePath('/', 'es')} class="btn btn-ghost">Inicio (ES)</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

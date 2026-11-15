@@ -1,0 +1,38 @@
+---
+import type { Certification } from '../data/certifications';
+import { useTranslations } from '../i18n/ui';
+import type { Lang } from '../consts';
+
+interface Props {
+  cert: Certification;
+  lang: Lang;
+  large?: boolean;
+}
+const { cert, lang, large = false } = Astro.props;
+const t = useTranslations(lang);
+
+const monogram = cert.image
+  ? undefined
+  : cert.issuer.split(/[\s&-]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+---
+
+<div class="card card-hover flex items-center gap-5 p-5">
+  {cert.image ? (
+    <img src={cert.image} alt={`${cert.name} — ${cert.issuer}`} class="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20" loading="lazy" decoding="async" />
+  ) : (
+    <div class:list={['mono-tile shrink-0 select-none rounded-2xl font-display font-semibold', large ? 'h-20 w-20 text-2xl sm:h-24 sm:w-24 sm:text-3xl' : 'h-16 w-16 text-xl']} aria-hidden="true">
+      <span class="relative z-10 tracking-tight">{monogram}</span>
+    </div>
+  )}
+  <div class="min-w-0">
+    <h3 class="font-display text-[15px] font-semibold leading-snug text-ink sm:text-base">{cert.name}</h3>
+    <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted">{cert.issuer} · {cert.year}</p>
+    {cert.credentialId && <p class="mt-0.5 font-mono text-[10px] text-muted">ID: {cert.credentialId}</p>}
+    {cert.verifyUrl && (
+      <a href={cert.verifyUrl} target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-accent no-underline transition-colors hover:text-accent-strong">
+        {t('common.verify')}
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+    )}
+  </div>
+</div>

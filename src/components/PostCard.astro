@@ -1,0 +1,38 @@
+---
+import { SITE, type Lang } from '../consts';
+import { formatDate, localizePath, readingTime, slugOf, tagSlug, type BlogPost } from '../utils/content';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  post: BlogPost;
+  lang: Lang;
+}
+
+const { post, lang } = Astro.props;
+const t = useTranslations(lang);
+const url = localizePath(`/blog/${slugOf(post)}/`, lang);
+const minutes = readingTime(post.body);
+---
+
+<article class="group">
+  <a href={url} class="block border-b border-line py-6 no-underline transition-colors first:pt-0 last:border-b-0 hover:bg-surface/50">
+    <div class="leader-row">
+      <h3 class="font-display text-xl font-semibold leading-snug tracking-tight text-ink transition-colors group-hover:text-accent-strong sm:text-2xl">
+        {post.data.title}
+      </h3>
+      <span class="leader" aria-hidden="true"></span>
+      <time class="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-muted" datetime={post.data.pubDate.toISOString()}>
+        {formatDate(post.data.pubDate, lang)}
+      </time>
+    </div>
+    {post.data.description && (
+      <p class="mt-2 max-w-3xl text-[15px] leading-relaxed text-muted line-clamp-2">{post.data.description}</p>
+    )}
+    <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">{minutes} {t('common.readingTime')}</span>
+      {post.data.tags.slice(0, 4).map((tag) => (
+        <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-accent-strong">#{tagSlug(tag)}</span>
+      ))}
+    </div>
+  </a>
+</article>

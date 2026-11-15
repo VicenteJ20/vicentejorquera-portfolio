@@ -1,0 +1,30 @@
+---
+import { render } from 'astro:content';
+import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
+import { getPosts, slugOf } from '../../../utils/content';
+
+export async function getStaticPaths() {
+  const esPosts = await getPosts('es');
+  const enSlugs = new Set((await getPosts('en')).map(slugOf));
+  return esPosts.map((post) => {
+    const slug = slugOf(post);
+    return {
+      params: { slug },
+      props: {
+        post,
+        alternates: {
+          es: `/es/blog/${slug}/`,
+          en: enSlugs.has(slug) ? `/blog/${slug}/` : '/blog/',
+        },
+      },
+    };
+  });
+}
+
+const { post, alternates } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<BlogPostLayout post={post} lang="es" alternates={alternates} headings={headings}>
+  <Content />
+</BlogPostLayout>

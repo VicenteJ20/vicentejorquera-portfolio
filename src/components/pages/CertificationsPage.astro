@@ -1,0 +1,24 @@
+---
+import type { Lang } from '../../consts';
+import { useTranslations } from '../../i18n/ui';
+import { certifications } from '../../data/certifications';
+import CertCard from '../CertCard.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
+  <p class="kicker">{t('certifications.kicker')}</p>
+  <h1 class="mt-4 font-display text-5xl font-semibold tracking-tight text-ink sm:text-6xl">{t('certifications.title')}</h1>
+  <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink-soft">{t('certifications.subtitle')}</p>
+
+  <div class="mt-12 grid gap-5 md:grid-cols-2">
+    {certifications.map((cert) => <CertCard cert={cert} lang={lang} large />)}
+  </div>
+
+  <p class="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.25em] text-muted">{t('certifications.footerNote')}</p>
+</section>
