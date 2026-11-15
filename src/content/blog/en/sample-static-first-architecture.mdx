@@ -6,6 +6,9 @@ tags: ["architecture", "cloud", "notes"]
 draft: false
 ---
 
+import { Image } from 'astro:assets';
+import architectureFlow from '../../../assets/blog/sample-post/architecture-flow.svg';
+
 This post is the living example of everything this blog supports: headings and a table of contents, code blocks, tables, an image hosted in `public/`, and a Mermaid diagram. Replace it with your first real article — or keep it as a smoke test.
 
 > There is no database behind this page. Your reading it is a static file being served from an edge.
@@ -27,7 +30,7 @@ Every request that doesn't need compute shouldn't get compute. For a personal si
 The pipeline is intentionally linear — content goes in, files come out:
 
 <figure>
-  <img src="/blog/sample-post/architecture-flow.svg" alt="Build pipeline: markdown in git, Astro static build, deployed to Cloudflare Pages edge" width="880" height="260" loading="lazy" />
+  <Image src={architectureFlow} alt="Build pipeline: markdown in git, Astro static build, deployed to Cloudflare Pages edge" width={880} height={260} loading="lazy" />
   <figcaption>Figure 1 — One direction of data flow. No runtime database, no CMS.</figcaption>
 </figure>
 

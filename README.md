@@ -50,7 +50,7 @@ Everything guess-able is marked with `⚠️`. Before publishing, update:
 | File | What |
 | --- | --- |
 | `src/consts.ts` | `email`, `github`, `linkedin`, `cfAnalyticsToken` |
-| `src/data/certifications.ts` | real **years**, `verifyUrl`, `credentialId` (+ badge images into `public/certs/`, reference as `image: '/certs/gh-300.png'`) |
+| `src/data/certifications.ts` | real **years**, `verifyUrl`, `credentialId` (+ badge images into `src/assets/certs/`, imported at the top of the file and referenced as `image: myBadge`) |
 | `src/data/experience.ts` | org names, periods, bullet points |
 | `src/pages/index.astro` family | hero copy lives in `src/i18n/ui.ts` (`hero.*`) — make the headline yours |
 | `src/content/blog/en/sample-static-first-architecture.mdx` | delete when you publish your first real post (the ES twin too) |
@@ -70,7 +70,6 @@ pubDate: 2026-11-20
 updatedDate: 2026-12-01        # optional
 tags: ["architecture", "ai"]  # free-form, lowercase; /tags/<tag>/ is generated automatically
 draft: false                  # true hides it from the build
-heroImage: /blog/my-post/cover.png   # optional — files go in public/blog/<slug>/
 ---
 
 Your markdown here. Everything you'd expect works:
@@ -81,7 +80,7 @@ Your markdown here. Everything you'd expect works:
 - **Headings** `##`/`###` — the table of contents is built from them automatically
 - **Code blocks** with syntax highlighting (light/dark aware): ` ```ts `, ` ```bash `, etc.
 - **Tables** — use GitHub-style pipe tables (they're styled nicely, horizontal scroll on mobile)
-- **Images** — put files in `public/blog/<slug>/` and reference `/blog/<slug>/file.png`. For a caption, use raw HTML: `<figure>` + `<figcaption>`
+- **Images** — always `<Image />` from `astro:assets`: import the file (`import cover from '../../assets/blog/<slug>/cover.png'`) and use `<Image src={cover} … />` (asset folder: `src/assets/blog/<slug>/`). For captions, wrap it in a `<figure>` + `<figcaption>`. Raw `<img>` tags are intentionally not used in this project — Astro optimizes every image through sharp at build time.
 - **Mermaid diagrams** — fenced blocks:
 
   ````
@@ -91,7 +90,7 @@ Your markdown here. Everything you'd expect works:
   ```
   ````
 
-  Mermaid is lazy-loaded only on pages that contain diagrams and re-renders on theme change. For large/complex diagrams, prefer exporting an SVG (Excalidraw, diagrams.net) into `public/blog/<slug>/`.
+  Mermaid is lazy-loaded only on pages that contain diagrams and re-renders on theme change. For large/complex diagrams, prefer exporting an SVG (Excalidraw, diagrams.net) and referencing it from the post (asset import + `<Image />`).
 
 - **Reading time** — computed from the word count (~230 wpm)
 - **Drafts** — `draft: true` in frontmatter keeps it out of the build entirely
@@ -125,7 +124,7 @@ Grid card + detail page (`/products/<slug>/`) are generated automatically. Nothi
 
 ## Adding a certification
 
-Append one object to `certifications` in `src/data/certifications.ts`. If the issuer provides badge images, drop them in `public/certs/` and set `image:`; otherwise the card renders a typographic monogram. Rebuild — done.
+Append one object to `certifications` in `src/data/certifications.ts` (import the badge at the top of that file from `src/assets/certs/`). Otherwise the card renders a typographic monogram. Rebuild — done.
 
 ## i18n model
 

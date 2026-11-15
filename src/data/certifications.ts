@@ -5,9 +5,16 @@
  * └─────────────────────────────────────────────────────────────┘
  *
  * ⚠️ YEARS below are placeholders — set the real issue years.
- *    Drop badge images into public/certs/ and set `image`,
- *    or leave `image` out to render a typographic badge.
+ *    Badge images live in src/assets/ (optimized by Astro at build).
+ *    To use your own: drop the file in src/assets/certs/ and import it here.
  */
+import type { ImageMetadata } from 'astro';
+import gh300 from '../assets/certs/github-copilot.svg';
+import googleAi from '../assets/imgs/google-ai-professional-certificate.png';
+import awsMlFoundations from '../assets/imgs/aws-academy-machine-learning-foundations.png';
+import awsPartner from '../assets/imgs/aws-partner-technical-accredited.png';
+import inacap from '../assets/imgs/inacap-2.webp';
+
 export interface Certification {
   id: string;
   name: string;
@@ -18,8 +25,8 @@ export interface Certification {
   verifyUrl?: string;
   /** Optional: credential ID shown in mono type */
   credentialId?: string;
-  /** Optional: path to badge image, e.g. '/certs/gh-300.png' (place in public/certs/) */
-  image?: string;
+  /** Optional: badge image (import from src/assets). Omit to render a typographic monogram. */
+  image?: ImageMetadata;
 }
 
 export const certifications: Certification[] = [
@@ -30,7 +37,7 @@ export const certifications: Certification[] = [
     year: 2025, // ⚠️ placeholder
     verifyUrl: undefined, // e.g. 'https://learn.microsoft.com/.../credentials/xxxx'
     credentialId: undefined,
-    image: '/certs/github-copilot.svg',
+    image: gh300,
   },
   {
     id: 'aws-ml-foundations',
@@ -39,7 +46,7 @@ export const certifications: Certification[] = [
     year: 2025, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
-    image: '/imgs/aws-academy-machine-learning-foundations.png',
+    image: awsMlFoundations,
   },
   {
     id: 'aws-partner',
@@ -48,7 +55,7 @@ export const certifications: Certification[] = [
     year: 2025, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
-    image: '/imgs/aws-partner-technical-accredited.png',
+    image: awsPartner,
   },
   {
     id: 'google-ai-professional',
@@ -57,7 +64,7 @@ export const certifications: Certification[] = [
     year: 2025, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
-    image: '/imgs/google-ai-professional-certificate.png',
+    image: googleAi,
   },
   {
     id: 'inacap-cloud',
@@ -66,7 +73,7 @@ export const certifications: Certification[] = [
     year: 2024, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
-    image: '/imgs/inacap-2.webp',
+    image: inacap,
   },
   {
     id: 'inacap-fullstack',
@@ -75,6 +82,6 @@ export const certifications: Certification[] = [
     year: 2024, // ⚠️ placeholder
     verifyUrl: undefined,
     credentialId: undefined,
-    image: '/imgs/inacap-2.webp',
+    image: inacap,
   },
 ];

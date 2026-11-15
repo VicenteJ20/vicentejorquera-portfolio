@@ -3,6 +3,7 @@
  * Home — hero + latest writing + products + trajectory + certifications.
  * All copy localized; all placeholder data marked in src/data/.
  */
+import { Image } from 'astro:assets';
 import { SITE, type Lang } from '../../consts';
 import { ui, useTranslations } from '../../i18n/ui';
 import { getPosts, getProducts, localizePath } from '../../utils/content';
@@ -57,7 +58,7 @@ const certificationsPath = localizePath('/certifications/', lang);
             <a href={certificationsPath} title={`${cert.name} — ${cert.issuer}`} aria-label={`${cert.name} — ${cert.issuer}`}
                class="block h-[48px] w-[48px] no-underline transition-transform hover:-translate-y-0.5 sm:h-[53px] sm:w-[53px]">
               {cert.image ? (
-                <img src={cert.image} alt="" width="53" height="53" class="h-full w-full object-contain" decoding="async" />
+                <Image src={cert.image} alt="" width={106} class="h-full w-full object-contain" loading="eager" />
               ) : (
                 <span class="mono-tile flex h-full w-full items-center justify-center rounded-xl font-display text-[15px] font-semibold tracking-tight">{monogram}</span>
               )}
@@ -133,7 +134,7 @@ const certificationsPath = localizePath('/certifications/', lang);
         <span class:list={['absolute -left-[2.18rem] top-[0.35rem] h-2.5 w-2.5 rounded-full sm:-left-[2.68rem]', item.current ? 'bg-accent shadow-[0_0_10px_2px_var(--accent-glow)]' : 'border border-line-strong bg-bg']} aria-hidden="true"></span>
         <div class="flex gap-4 sm:gap-5">
           {item.logo && (
-            <img src={item.logo} alt={`${item.org} logo`} class="h-11 w-11 shrink-0 rounded-xl border border-line bg-surface object-contain p-1.5 sm:h-12 sm:w-12" decoding="async" />
+            <Image src={item.logo} width={96} alt={`${item.org} logo`} class="h-11 w-11 shrink-0 rounded-xl border border-line bg-surface object-contain p-1.5 sm:h-12 sm:w-12" />
           )}
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">

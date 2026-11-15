@@ -22,7 +22,7 @@ const t = useTranslations(lang);
 
 const slug = slugOf(post);
 const url = localizePath(`/blog/${slug}/`, lang);
-const ogImage = post.data.heroImage ?? `/og/${lang}/${slug}.png`;
+const ogImage = `/og/${lang}/${slug}.png`;
 const minutes = readingTime(post.body);
 
 // Prev/next within the same language, by date
@@ -84,12 +84,6 @@ const blogPostingJsonLd = {
             </div>
           )}
         </header>
-
-        {post.data.heroImage && (
-          <figure class="mt-8">
-            <img src={post.data.heroImage} alt={post.data.heroImageAlt ?? post.data.title} class="w-full rounded-2xl border border-line object-cover" loading="eager" decoding="async" />
-          </figure>
-        )}
 
         {/* Mobile TOC */}
         <details class="toc mt-8 rounded-xl border border-line bg-surface p-4 xl:hidden">

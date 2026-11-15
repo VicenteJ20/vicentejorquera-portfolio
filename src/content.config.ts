@@ -13,11 +13,8 @@ const blog = defineCollection({
     description: z.string().max(220),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
-    /** Free-form tags; keep lowercase (e.g. architecture, ai, cloud) */
+    /** Tags are free-form strings; keep lowercase (e.g. architecture, ai, cloud) */
     tags: z.array(z.string()).default([]),
-    /** Optional cover image — put the file in public/blog/<slug>/ and reference '/blog/<slug>/cover.png' */
-    heroImage: z.string().optional(),
-    heroImageAlt: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

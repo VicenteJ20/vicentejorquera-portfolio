@@ -6,6 +6,9 @@ tags: ["arquitectura", "cloud", "notas"]
 draft: false
 ---
 
+import { Image } from 'astro:assets';
+import architectureFlow from '../../../assets/blog/sample-post/architecture-flow.svg';
+
 Este artículo es el ejemplo vivo de todo lo que este blog soporta: encabezados con tabla de contenidos, bloques de código, tablas, una imagen alojada en `public/` y un diagrama Mermaid. Reemplázalo con tu primer artículo real — o déjalo como prueba de humo.
 
 > Detrás de esta página no hay base de datos. Que la estés leyendo es un archivo estático servido desde el edge.
@@ -27,7 +30,7 @@ Todo request que no necesita cómputo no debería recibir cómputo. Para un siti
 El pipeline es intencionalmente lineal — entra contenido, salen archivos:
 
 <figure>
-  <img src="/blog/sample-post/architecture-flow.svg" alt="Pipeline de build: markdown en git, build estático con Astro, despliegue al edge de Cloudflare Pages" width="880" height="260" loading="lazy" />
+  <Image src={architectureFlow} alt="Pipeline de build: markdown en git, build estático con Astro, despliegue al edge de Cloudflare Pages" width={880} height={260} loading="lazy" />
   <figcaption>Figura 1 — Un solo sentido de avance de datos. Sin base de datos en runtime, sin CMS.</figcaption>
 </figure>
 
