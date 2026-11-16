@@ -57,8 +57,8 @@ const blogPostingJsonLd = {
     inLanguage: lang === "es" ? "es-CL" : "en-US",
     keywords: post.data.tags.join(", "),
     mainEntityOfPage: absoluteUrl(url),
-    author: { "@type": "Person", name: SITE.name, url: SITE.url },
-    publisher: { "@type": "Person", name: SITE.name, url: SITE.url },
+    author: { "@type": "Person", name: SITE.name, url: SITE.linkedin },
+    publisher: { "@type": "Person", name: SITE.name, url: SITE.linkedin },
 };
 ---
 
@@ -67,6 +67,7 @@ const blogPostingJsonLd = {
     title={post.data.title}
     description={post.data.description}
     image={ogImage}
+    imageAlt={post.data.title}
     type="article"
     publishedTime={post.data.pubDate.toISOString()}
     modifiedTime={post.data.updatedDate?.toISOString()}

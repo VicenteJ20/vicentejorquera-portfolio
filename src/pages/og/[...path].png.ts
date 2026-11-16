@@ -3,6 +3,7 @@
  *   /og/default.png            — site-wide card
  *   /og/en/<slug>.png          — per blog post
  *   /og/es/<slug>.png          — por artículo
+ *   /og/products/<slug>.png    — per product (shared by both languages)
  * Design: dark editorial card, blueprint grid, amber accent, Fraunces-ish serif fallback.
  */
 import type { APIRoute } from 'astro';
@@ -27,6 +28,22 @@ export async function getStaticPaths() {
         kicker: lang === 'es' ? 'BLOG — ES' : 'BLOG — EN',
         title: post.data.title,
         tags: post.data.tags,
+      },
+    });
+  }
+  // Products: one card per slug (name and stack are shared across languages)
+  const products = await getCollection('products', ({ data }) => !data.draft);
+  const seen = new Set<string>();
+  for (const product of products) {
+    const slug = slugOf(product);
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+    paths.push({
+      params: { path: `products/${slug}` },
+      props: {
+        kicker: 'PRODUCT',
+        title: product.data.name,
+        tags: product.data.stack,
       },
     });
   }
@@ -115,7 +132,9 @@ export const GET: APIRoute = async ({ props }) => {
   return new Response(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      // Cards regenerate at the same URL on rebuild — revalidate daily,
+      // don't pin an immutable year-long cache on a stable URL
+      'Cache-Control': 'public, max-age=86400',
     },
   });
 };

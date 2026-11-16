@@ -23,8 +23,9 @@ export async function getStaticPaths() {
 }
 
 const { product, alternates } = Astro.props;
+const slug = slugOf(product);
 ---
 
-<BaseLayout lang="es" title={product.data.name} description={product.data.description} alternates={alternates}>
+<BaseLayout lang="es" title={product.data.name} description={product.data.description} image={`/og/products/${slug}.png`} imageAlt={product.data.name} alternates={alternates}>
   <ProductDetailPage lang="es" product={product} />
 </BaseLayout>

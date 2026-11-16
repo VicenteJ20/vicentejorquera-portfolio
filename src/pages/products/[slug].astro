@@ -24,8 +24,9 @@ export async function getStaticPaths() {
 
 const t = useTranslations('en');
 const { product, alternates } = Astro.props;
+const slug = slugOf(product);
 ---
 
-<BaseLayout lang="en" title={product.data.name} description={product.data.description} alternates={alternates}>
+<BaseLayout lang="en" title={product.data.name} description={product.data.description} image={`/og/products/${slug}.png`} imageAlt={product.data.name} alternates={alternates}>
   <ProductDetailPage lang="en" product={product} />
 </BaseLayout>
