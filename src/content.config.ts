@@ -34,6 +34,14 @@ const products = defineCollection({
     website: z.string().url().optional(),
     released: z.coerce.date(),
     draft: z.boolean().default(false),
+    /** Monogram tile background — start of the gradient (HEX). Defaults to the site tile. */
+    tileFrom: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'Use a HEX color, e.g. #1d2b3a').optional(),
+    /** Monogram tile background — end of the gradient (HEX). Defaults to tileFrom (solid). */
+    tileTo: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'Use a HEX color, e.g. #0d151d').optional(),
+    /** Monogram letter color (HEX). Defaults to the site tile ink. */
+    tileInk: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'Use a HEX color, e.g. #e8f0e4').optional(),
+    /** Word shown in the tile instead of the initial (e.g. "MeetPulse"). */
+    tileText: z.string().max(40).optional(),
   }),
 });
 

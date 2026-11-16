@@ -1,7 +1,7 @@
 ---
 import { SITE, type Lang } from '../../consts';
 import { useTranslations } from '../../i18n/ui';
-import { formatDate, getProducts, localizePath, slugOf } from '../../utils/content';
+import { formatDate, getProducts, localizePath, slugOf, tileStyle } from '../../utils/content';
 import SectionHeader from '../SectionHeader.astro';
 
 interface Props {
@@ -22,8 +22,12 @@ const products = await getProducts(lang);
     <div class="mt-12 grid gap-6 sm:grid-cols-2">
       {products.map((product) => (
         <a href={localizePath(`/products/${slugOf(product)}/`, lang)} class="card card-hover group overflow-hidden no-underline">
-          <div class="mono-tile h-36">
-            <span class="relative z-10 font-display text-6xl font-semibold tracking-tighter">{product.data.name.charAt(0).toUpperCase()}</span>
+          <div class="mono-tile h-36" style={tileStyle(product.data)}>
+            {product.data.tileText ? (
+              <span class="relative z-10 px-4 text-center font-display text-4xl font-semibold leading-tight tracking-tight">{product.data.tileText}</span>
+            ) : (
+              <span class="relative z-10 font-display text-6xl font-semibold tracking-tighter">{product.data.name.charAt(0).toUpperCase()}</span>
+            )}
           </div>
           <div class="p-6">
             <div class="flex items-baseline justify-between gap-4">

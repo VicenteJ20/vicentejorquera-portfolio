@@ -19,6 +19,19 @@ export async function getProducts(lang: Lang): Promise<Product[]> {
   return all.sort((a, b) => b.data.released.getTime() - a.data.released.getTime());
 }
 
+/**
+ * Inline CSS custom-property overrides for a product's monogram tile.
+ * Returns undefined when the product defines no tile colors (site defaults apply).
+ */
+export function tileStyle(data: { tileFrom?: string; tileTo?: string; tileInk?: string }): string | undefined {
+  const parts: string[] = [];
+  if (data.tileFrom) parts.push(`--tile-from:${data.tileFrom}`);
+  // With only tileFrom set, render a solid tile (from == to)
+  if (data.tileTo ?? data.tileFrom) parts.push(`--tile-to:${data.tileTo ?? data.tileFrom}`);
+  if (data.tileInk) parts.push(`--tile-ink:${data.tileInk}`);
+  return parts.length ? parts.join(';') : undefined;
+}
+
 /** 'en/my-post' -> 'my-post' */
 export function slugOf(entry: { id: string }): string {
   return entry.id.replace(/^(en|es)\//, '');

@@ -244,7 +244,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle at 85% 15%, var(--accent-glow), transparent 60%);
+  background-image: radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--tile-ink) 26%, transparent), transparent 60%);
 }
 
 /* Skip link */

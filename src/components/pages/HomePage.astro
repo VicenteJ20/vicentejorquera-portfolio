@@ -6,7 +6,7 @@
 import { Image } from 'astro:assets';
 import { SITE, type Lang } from '../../consts';
 import { ui, useTranslations } from '../../i18n/ui';
-import { getPosts, getProducts, localizePath } from '../../utils/content';
+import { getPosts, getProducts, localizePath, tileStyle } from '../../utils/content';
 import { experience, education } from '../../data/experience';
 import { certifications } from '../../data/certifications';
 import PostCard from '../PostCard.astro';
@@ -99,8 +99,12 @@ const certificationsPath = localizePath('/certifications/', lang);
       <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
           <a href={localizePath(`/products/${product.id.replace(/^(en|es)\//, '')}/`, lang)} class="card card-hover group overflow-hidden no-underline">
-            <div class="mono-tile h-28">
-              <span class="relative z-10 font-display text-5xl font-semibold tracking-tighter">{product.data.name.charAt(0).toUpperCase()}</span>
+            <div class="mono-tile h-28" style={tileStyle(product.data)}>
+              {product.data.tileText ? (
+                <span class="relative z-10 px-4 text-center font-display text-[26px] font-semibold leading-tight tracking-tight">{product.data.tileText}</span>
+              ) : (
+                <span class="relative z-10 font-display text-5xl font-semibold tracking-tighter">{product.data.name.charAt(0).toUpperCase()}</span>
+              )}
             </div>
             <div class="p-5">
               <h3 class="font-display text-lg font-semibold text-ink transition-colors group-hover:text-accent-strong">{product.data.name}</h3>
