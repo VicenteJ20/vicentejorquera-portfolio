@@ -1,66 +1,84 @@
 ---
 title: "MeetPulse Desktop — how it's built"
-description: "Placeholder: a tour of MeetPulse Desktop's architecture — Tauri and Rust at the core, Next.js UI, local AI models, and optional cloud via Vercel AI Gateway."
+description: "A tour of MeetPulse Desktop's architecture — Tauri and Rust at the core, Next.js in the UI, local AI models, and optional cloud via Vercel AI Gateway."
 pubDate: 2026-11-15
 tags: ["architecture", "ai", "rust"]
-draft: true
+draft: false
 ---
 
-> **Placeholder draft** — this article is under construction. The structure and notes below are a skeleton to fill in with the real content; until then it's hidden from the site (`draft: true`).
+import { Image } from 'astro:assets';
+import capasEn from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-capas-en.webp';
+import meetPulseFlow from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-flow-en.webp';
+import meetPulseArchitecture from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-architecture-en.webp';
+
+MeetPulse is a desktop application designed so that users can record meetings in real time by capturing their computer's audio along with their microphone. This makes it agnostic to the meeting tool you're working with — it doesn't matter whether it's Microsoft Teams, Zoom, Google Meet, or anything else. MeetPulse captures it all without issue.
+
+> It is the user's responsibility to inform all meeting participants that recording is on.
 
 ## The problem it solves
 
-MeetPulse Desktop exists because meetings generate decisions that get lost. The app captures system and microphone audio, transcribes and summarizes — all local by default, with the cloud as an explicit opt-in.
+Today, nearly every new product, whether built with AI or not, is born as a SaaS. For a meeting assistant, that decision carries a particular cost: what it processes is the most sensitive material running through a company — conversations about clients, pricing, people, and strategy. A bot that joins a call and sends the audio to an external server, even one that complies with standard privacy policies and regulations, forces users to trust a third party before they even know whether the product is useful to them. And it requires a constant internet connection, even to review the transcripts of past meetings.
 
-{/* TODO: real motivation, 1-2 paragraphs. */}
+**MeetPulse** starts from the opposite question: **what part of this work actually needs a server?** Capturing audio, mixing it, transcribing it, summarizing it with a small model, indexing it, and searching it all fit on many high-end and even mid-range laptops today. At the same time, to cover the reality where companies can't afford cutting-edge hardware, **MeetPulse** is compatible with the cloud through **Vercel AI Gateway** — allowing lower-end machines to run MeetPulse with its full feature set.
 
-## The 30,000-foot view
+> Vercel AI Gateway offers ZDR (Zero Data Retention) and No Training indicators (providers that state they do not use your data for training). These are available on Vercel's PRO plans, and it's the user's responsibility to pay for the corresponding subscription to take advantage of these features when the business requires it.
 
-{/* TODO: architecture diagram (Excalidraw → SVG in src/assets/blog/meetpulse-desktop/ or inline Mermaid) */}
+<figure>
+  <Image src={capasEn} alt="Layered diagram of MeetPulse Desktop: your machine, local data, local AI, capture, and optional cloud (Vercel AI Gateway)" width={1200} loading="lazy" />
+  <figcaption>Figure 1 — MeetPulse's layers: only the optional cloud layer sends data off your machine; the other four live on your computer.</figcaption>
+</figure>
 
-```mermaid
-flowchart LR
-    A[Audio: system + mic] --> B[Core Rust<br/>Tauri]
-    B --> C[Transcription<br/>Parakeet / Whisper]
-    C --> D[Analysis<br/>Qwen / Gemma local]
-    C -.optional.-> E[Vercel AI Gateway<br/>cloud models]
-    B --> F[(Local library<br/>client → project → meeting)]
-    F --> G[UI Next.js<br/>desktop shell]
-```
+## The flow of the solution
 
-## The core: Rust + Tauri
+As noted in the points above, **MeetPulse** uses a hybrid strategy to do its work, letting users choose whether they want everything 100% local, everything 100% in the cloud, or — for each piece — what stays on their machine and what goes to the cloud. The decision is entirely in the user's hands.
 
-{/* TODO:
-- Why Tauri over Electron (binary size, memory, native audio access)
-- System-audio vs. mic capture in parallel and smart mixing
-- Local persistence (SQLite, audio files, semantic search index)
-- Release process: .exe/.msi installers, code signing pending */}
+<figure>
+  <Image src={meetPulseFlow} alt="MeetPulse flow diagram explaining the end-to-end process, from listening to final analysis" width={1200} loading="lazy" />
+  <figcaption>Figure 2 — MeetPulse's flow: you choose what goes out to the internet and what stays under your control</figcaption>
+</figure>
 
-## The UI: Next.js + TypeScript
+The flow shown in the diagram, in detail, looks like this:
 
-{/* TODO:
-- Why Next.js inside Tauri (static SPA served by the shell)
-- UI ↔ Rust communication (Tauri commands/events)
-- Live transcription state, time-chip navigation, Ctrl+K palette */}
+1. **Capture and mixing**: The microphone and system audio enter a processing engine in parallel; the audio is mixed, and the voice engine lets only speech through.
+2. **Transcription**: Locally, it uses Whisper or Parakeet, which turn speech into text almost instantly. When sending data to the cloud is acceptable, dedicated transcription models such as **MICROSOFT MAI TRANSCRIBE 2** are recommended — it has given me excellent results.
+3. **Local data**: Meetings, transcripts, and summaries are stored in a local SQLite database on your machine, with no extra accounts required.
+4. **Insights and Meety**: Summaries, decisions, chat with citations, and search can all access this data. As an additional value proposition, **Meety** (MeetPulse's live in-meeting assistant) also has a **Coach** mode that runs during the live meeting, supporting you with decisions, unclear points, and suggestions on how to handle each situation.
+5. **Local AI**: Ollama or llama.cpp let you run AI models such as Whisper or Parakeet on your machine. They also run generative AI models such as QWEN or Gemma to analyze transcripts and chat with Meety.
+6. **100% optional cloud**: If you choose a cloud model — for transcription alone or for meeting analysis — the content leaves your machine through Vercel AI Gateway using an account you own.
 
-## Local AI first, cloud optional
+## The solution's architecture
 
-{/* TODO:
-- Local models: Qwen 3.5 2B and Gemma 4 E4B for summary/chat/coach; Parakeet and Whisper for transcription
-- Vercel AI Gateway: a single user-owned key, live model list with pricing, ZDR / No Training depending on provider
-- The three privacy modes: all local / text only to the cloud / audio and text to the cloud */}
+MeetPulse is a Tauri 2 app. The interface is built with Next.js using React and TypeScript, renders inside the system's WebView, and all the heavy lifting lives in a RUST core. There is no separate backend service.
 
-## Decisions and trade-offs
+<figure>
+  <Image src={meetPulseArchitecture} alt="MeetPulse architecture diagram, explaining how each component of MeetPulse interacts" width={1200} loading="lazy" />
+  <figcaption>Figure 3 — MeetPulse's architecture: understanding how each component of the system interacts</figcaption>
+</figure>
 
-{/* TODO: decision table — e.g. Tauri vs Electron, local vs cloud, Meetily (MIT) as open-source base and what was changed */}
+The layers in the diagram correspond to the following:
 
-| Decision | Why |
-| --- | --- |
-| Tauri + Rust | TODO |
-| Next.js for the UI | TODO |
-| Local-first | TODO |
-| Based on Meetily (MIT) | TODO |
+1. **Interface**: Next.js and React inside Tauri's WebView; they never touch audio or models.
+2. **Rust core**: Receives commands via `invoke`, reports progress via `emit`, and coordinates audio, transcription, summarization, and data.
+3. **SQLite**: Meetings, transcripts, chats, and vector indexes (FTS5 and e5 embeddings).
+4. **llama-helper**: The core for running local models on the device.
+5. **Vercel AI Gateway**: The single door to the cloud, active only if the user chooses remote mode.
+
+## Try it today
+
+MeetPulse is free, requires no account, and has no limit on meetings or hours. If you're on Windows 10 or 11 (64-bit), you can be recording your next meeting in two minutes:
+
+1. Download the installer from [meetpulse.vicentejorquera.dev](https://meetpulse.vicentejorquera.dev/) or directly from [MeetPulse_x64-setup.exe on GitHub Releases](https://github.com/VicenteJ20/meetpulse-app/releases/latest/download/MeetPulse_x64-setup.exe).
+2. Open the app and follow the welcome flow: audio permissions and downloading a model (a small Whisper model is enough to get started).
+3. Press **Record** on the Home screen. Everything else happens on your machine.
+
+No account, no subscription, no bots in the call. If you later want the cloud, connect your own Vercel AI Gateway key and you decide what leaves your PC. If Windows SmartScreen warns you during installation, click "More info" and then "Run anyway" — the installers aren't code-signed yet.
+
+Prefer to look at the code first? [Everything is on GitHub](https://github.com/VicenteJ20/meetpulse-app).
 
 ## What's next
 
-{/* TODO: macOS and Linux coming soon, installer code signing, audio import (beta) */}
+MeetPulse is on Windows today; macOS and Linux are on the way, and the installers aren't code-signed yet (SmartScreen will say so — and yes, it's safe). Audio import for retranscribing old meetings is in beta. And yes: I accept issues and PRs on [GitHub](https://github.com/VicenteJ20/meetpulse-app).
+
+But beyond the roadmap, MeetPulse's bet is simple: your meetings are yours. AI no longer needs a server to be useful; the server is now a choice, not a requirement. If that resonates with you, download it, record your next call, and ask it everything you don't want to forget.
+
+And if something doesn't work the way you expected, let me know — I'd rather fix it than defend it.

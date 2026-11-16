@@ -35,8 +35,8 @@ export const certifications: Certification[] = [
     name: 'GH-300 — GitHub Copilot',
     issuer: 'GitHub',
     year: 2025, // ⚠️ placeholder
-    verifyUrl: undefined, // e.g. 'https://learn.microsoft.com/.../credentials/xxxx'
-    credentialId: undefined,
+    verifyUrl: 'https://learn.microsoft.com/en-us/users/jvicente20/credentials/c6711e29e790e197',
+    credentialId: 'C6711E29E790E197',
     image: gh300,
   },
   {
@@ -44,8 +44,8 @@ export const certifications: Certification[] = [
     name: 'AWS Academy Machine Learning Foundations',
     issuer: 'AWS Academy',
     year: 2025, // ⚠️ placeholder
-    verifyUrl: undefined,
-    credentialId: undefined,
+    verifyUrl: 'https://www.credly.com/badges/4b97995f-be59-45cd-a13f-fe299c7b15dc/public_url',
+    credentialId: '4b97995f-be59-45cd-a13f-fe299c7b15dc',
     image: awsMlFoundations,
   },
   {
@@ -53,17 +53,17 @@ export const certifications: Certification[] = [
     name: 'AWS Partner Technical Accredited',
     issuer: 'AWS',
     year: 2025, // ⚠️ placeholder
-    verifyUrl: undefined,
-    credentialId: undefined,
+    verifyUrl: 'https://www.credly.com/badges/4b97995f-be59-45cd-a13f-fe299c7b15dc/public_url',
+    credentialId: '4b97995f-be59-45cd-a13f-fe299c7b15dc',
     image: awsPartner,
   },
   {
     id: 'google-ai-professional',
     name: 'Google AI Professional',
     issuer: 'Google',
-    year: 2025, // ⚠️ placeholder
-    verifyUrl: undefined,
-    credentialId: undefined,
+    year: 2026, // ⚠️ placeholder
+    verifyUrl: 'https://www.credly.com/badges/7bce044c-067b-40c9-b4fd-d94f875aa4bb/public_url',
+    credentialId: '7bce044c-067b-40c9-b4fd-d94f875aa4bb',
     image: googleAi,
   },
   {

@@ -53,7 +53,6 @@ Everything guess-able is marked with `⚠️`. Before publishing, update:
 | `src/data/certifications.ts` | real **years**, `verifyUrl`, `credentialId` (+ badge images into `src/assets/certs/`, imported at the top of the file and referenced as `image: myBadge`) |
 | `src/data/experience.ts` | org names, periods, bullet points |
 | `src/pages/index.astro` family | hero copy lives in `src/i18n/ui.ts` (`hero.*`) — make the headline yours |
-| `src/content/blog/en/sample-static-first-architecture.mdx` | delete when you publish your first real post (the ES twin too) |
 | `src/content/products/en/sample-product.mdx` | sample product, `draft: true` — replace with real ones |
 
 Simple test after edits: `npm run build && npm run preview`.
