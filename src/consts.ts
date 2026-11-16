@@ -26,6 +26,8 @@ export const SITE = {
   email: 'contacto@vicentejorquera.dev',
   github: 'https://github.com/VicenteJ20',
   linkedin: 'https://www.linkedin.com/in/vicentejorquera',
+  /** X (Twitter) handle — used for twitter:site / twitter:creator and sameAs */
+  twitter: '@jvicente_20',
   // Where the RSS feeds point to
   rss: { en: '/rss.xml', es: '/es/rss.xml' },
   // ⚠️ Paste your Cloudflare Web Analytics token here (e.g. 'a1b2c3...').

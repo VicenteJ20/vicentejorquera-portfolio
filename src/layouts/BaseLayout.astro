@@ -87,7 +87,7 @@ const personJsonLd = {
     { '@type': 'CollegeOrUniversity', name: 'INACAP — Técnico Analista Programador' },
   ],
   knowsAbout: ['Software Architecture', 'Artificial Intelligence', 'Cloud Architecture', 'Full-Stack Development', 'Technical Consulting'],
-  sameAs: [SITE.github, SITE.linkedin],
+  sameAs: [SITE.github, SITE.linkedin, `https://x.com/${SITE.twitter.replace(/^@/, '')}`],
 };
 
 const webSiteJsonLd = {
@@ -145,6 +145,8 @@ if (jsonLd) ldBlocks.push(...(Array.isArray(jsonLd) ? jsonLd : [jsonLd]));
 
     {/* Twitter / X */}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={SITE.twitter} />
+    <meta name="twitter:creator" content={SITE.twitter} />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
