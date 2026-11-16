@@ -43,7 +43,7 @@ const navItems = [
 
     {/* Nav + controls */}
     <div class="flex shrink-0 items-center gap-2 sm:gap-4">
-      <nav class="flex items-center gap-3 sm:gap-5" aria-label="Main">
+      <nav class="hidden items-center gap-3 sm:flex sm:gap-5" aria-label="Main">
         {navItems.map((item) => (
           <a href={item.href} class="nav-link" aria-current={item.active ? 'true' : undefined}>{item.label}</a>
         ))}
@@ -75,7 +75,27 @@ const navItems = [
           <path d="M20.4 14.5A8.5 8.5 0 0 1 9.5 3.6a8.5 8.5 0 1 0 10.9 10.9Z" />
         </svg>
       </button>
+
+      {/* Menu toggle — below sm only */}
+      <button type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-nav" class="flex h-9 w-9 items-center justify-center rounded-full border border-line-strong text-ink transition-colors hover:border-accent hover:text-accent sm:hidden" aria-label="Toggle menu">
+        <svg class="icon-menu h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h16" />
+        </svg>
+        <svg class="icon-close hidden h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12" /><path d="M18 6 6 18" />
+        </svg>
+      </button>
     </div>
+  </div>
+
+  {/* Collapsible nav — below sm only */}
+  <div id="mobile-nav" class="mobile-nav border-t border-line sm:hidden" hidden>
+    <nav class="shell flex flex-col py-3" aria-label="Mobile">
+      {navItems.map((item) => (
+        <a href={item.href} aria-current={item.active ? 'true' : undefined} class="mobile-nav-link">{item.label}</a>
+      ))}
+      <a href={rss} class="mobile-nav-link">RSS</a>
+    </nav>
   </div>
 </header>
 
@@ -95,6 +115,50 @@ const navItems = [
     document.querySelectorAll('.icon-moon').forEach((el) => el.classList.toggle('hidden', !dark));
   }
   syncThemeIcons();
+
+  // Mobile menu — open/close, Escape, outside click, close on navigation
+  function syncMenuIcons(open) {
+    document.querySelectorAll('[data-menu-toggle]').forEach((btn) => {
+      btn.setAttribute('aria-expanded', String(open));
+      const menuIcon = btn.querySelector('.icon-menu');
+      const closeIcon = btn.querySelector('.icon-close');
+      if (menuIcon) menuIcon.classList.toggle('hidden', open);
+      if (closeIcon) closeIcon.classList.toggle('hidden', !open);
+    });
+  }
+  function closeMenu() {
+    const panel = document.getElementById('mobile-nav');
+    if (panel) panel.hidden = true;
+    syncMenuIcons(false);
+  }
+  if (!document.documentElement.hasAttribute('data-menu-delegate')) {
+    document.documentElement.setAttribute('data-menu-delegate', 'true');
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const btn = target.closest('[data-menu-toggle]');
+      const panel = document.getElementById('mobile-nav');
+      if (btn) {
+        if (!panel) return;
+        panel.hidden = !panel.hidden;
+        syncMenuIcons(!panel.hidden);
+        return;
+      }
+      // Tapping a link inside the menu navigates — close it
+      if (panel && !panel.hidden && target.closest('#mobile-nav a')) {
+        closeMenu();
+        return;
+      }
+      // Clicking outside the menu closes it
+      if (panel && !panel.hidden && !target.closest('#mobile-nav') && !target.closest('[data-menu-toggle]')) {
+        closeMenu();
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeMenu();
+    });
+    document.addEventListener('astro:after-swap', closeMenu);
+  }
 
   // One delegated listener survives client-side navigations
   if (!document.documentElement.hasAttribute('data-theme-delegate')) {

@@ -283,6 +283,28 @@ body {
   border-bottom-color: var(--accent);
 }
 
+/* Mobile menu (below sm) — blends with the header, links get a full tap target */
+.mobile-nav {
+  background: var(--bg);
+}
+.mobile-nav-link {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 0.85rem 0.25rem;
+  border-bottom: 1px solid var(--line);
+  transition: color 0.18s ease;
+}
+.mobile-nav-link:last-child { border-bottom: none; }
+.mobile-nav-link:hover { color: var(--accent); }
+.mobile-nav-link[aria-current="true"] { color: var(--accent); }
+
+/* Horizontal scroll rows without a visible scrollbar */
+.scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
 /* ============================================================
    .post-body — typography for rendered Markdown articles
    ============================================================ */
