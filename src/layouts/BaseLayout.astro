@@ -37,8 +37,8 @@ interface Props {
 const { lang } = Astro.props;
 const fallbackDescription =
   lang === 'es'
-    ? 'Vicente Jorquera — Arquitecto de Software en consultoría de Arquitectura e IA. Escribo sobre arquitectura, IA y cloud.'
-    : SITE.defaultTitle;
+    ? 'Vicente Jorquera — arquitecto de software. Escribo sobre arquitectura, IA aplicada y cloud.'
+    : 'Vicente Jorquera — software architect writing about architecture, applied AI and cloud.';
 
 const {
   title,
@@ -65,7 +65,7 @@ const xDefault = alts.en ?? alts.es;
 const locale = SITE.locale[lang];
 const defaultTitle =
   lang === 'es'
-    ? 'Vicente Jorquera — Arquitecto de Software · Consultoría de Arquitectura e IA'
+    ? 'Vicente Jorquera — Arquitecto de Software e IA'
     : SITE.defaultTitle;
 const fullTitle = title ? `${title} · ${SITE.name}` : defaultTitle;
 const canonical = absoluteUrl(Astro.url.pathname);

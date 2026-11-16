@@ -11,8 +11,8 @@
 export const SITE = {
   name: 'Vicente Jorquera',
   url: 'https://vicentejorquera.dev',
-  /** Browser tab + SEO default title */
-  defaultTitle: 'Vicente Jorquera — Software Architect · Architecture & AI Consulting',
+  /** Browser tab + SEO default title (keep ≤ 60 chars for search/social) */
+  defaultTitle: 'Vicente Jorquera — Software Architect (Architecture & AI)',
   /** Shown next to the name in the header/footer */
   role: {
     en: 'Software Architect · Architecture & AI',

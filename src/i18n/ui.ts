@@ -102,7 +102,7 @@ export const ui = {
     },
     meta: {
       homeDescription:
-        'Vicente Jorquera — Software Architect in Architecture & AI consulting. Writing about system architecture, applied AI, cloud platforms and engineering practice.',
+        'Software architect in Architecture & AI consulting — writing about system architecture, applied AI and cloud.',
       blogDescription:
         'Technical writing on software architecture, AI, cloud platforms and engineering practice by Vicente Jorquera.',
       certificationsDescription: 'Professional certifications of Vicente Jorquera — GitHub, Google and INACAP.',
@@ -216,7 +216,7 @@ export const ui = {
     },
     meta: {
       homeDescription:
-        'Vicente Jorquera — Arquitecto de Software en consultoría de Arquitectura e IA. Escribo sobre arquitectura de sistemas, IA aplicada, cloud y práctica de ingeniería.',
+        'Arquitecto de software en consultoría de Arquitectura e IA — escribo sobre arquitectura, IA aplicada y cloud.',
       blogDescription:
         'Escritura técnica sobre arquitectura de software, IA, plataformas cloud y práctica de ingeniería por Vicente Jorquera.',
       certificationsDescription: 'Certificaciones profesionales de Vicente Jorquera — GitHub, Google e INACAP.',
