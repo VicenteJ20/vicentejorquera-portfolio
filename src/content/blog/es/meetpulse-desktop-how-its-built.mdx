@@ -1,0 +1,84 @@
+---
+title: "MeetPulse Desktop — cómo está construido"
+description: "Un recorrido por la arquitectura de MeetPulse Desktop — Tauri y Rust en el core, Next.js en la UI, modelos locales de IA y nube opcional vía Vercel AI Gateway."
+pubDate: 2026-11-15
+tags: ["arquitectura", "ia", "rust"]
+draft: false
+---
+
+import { Image } from 'astro:assets';
+import capasEs from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-capas-es.webp';
+import meetPulseFlow from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-flow-es.webp';
+import meetPulseArchitecture from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-architecture-es.webp';
+
+MeetPulse es una aplicación de escritorio pensada que sus usuarios puedan grabar reuniones en tiempo real capturando el audio de su computador y micrófono. De esta manera, se vuelve agnóstico a la herramienta de reuniones con la que se está trabjando, No importa si es Microsoft Teams, Zoom, Google Meet, entre otros. MeetPulse lo captura sin problemas.
+
+> Es responsabilidad del usuario informar a los participantes de cada reunión que la grabación está encendida.
+
+## El problema que resuelve
+
+Hoy en día casi todo producto nuevo, ya sea, creado o no con IA nace como SaaS. Para un asistente de reuniones esa decisión tiene un costo particular: lo que procesa es lo más sensible que ocurre en una empresa, conversaciones sobre clientes, precios, personas y estrategias. Un bot que se une a una llamada y envía el audio a un servidor externo, aún cumpliendo con políticas de privacidad y regulaciones estándar, obliga a que los usuarios confíen en un tercero antes de saber si el producto les es de utilidad. Y además, requieren de internet constante, incluso para análizar la transcripciones de reuniones pasadas.
+
+**MeetPulse** parte de la pregunta contraria: **¿Qué parte de este trabajo necesita realmente un servidor?** Capturar el audio, mezclarlo, transcribirlo, resumirlo con un modelo pequeño, indexarlo y buscarlo hoy en día cabe en muchos equipos portátiles de alta gama e incluso de gama media. Sin embargo, para cubrir esa necesidad que se da cuando las empresas no pueden costear equipos de última tecnología **MeetPulse** es compatible con la nube mediante **Vercel AI Gateway** permitiendo así que equipos de bajos recursos puedan ejecutar MeetPulse con todas sus capacidades.
+
+> Vercel AI Gateway ofrece ZDR (AI Gateway Zero Data Retention (ZDR)) e indicadores No training (Proveedores indican que no utilizan los datos para entrenamiento). Esto se encuentra disponible en planes PRO de Vercel, es responsabilidad del usuario pagar su suscripción correspondiente para aprovechar estas características cuando el negocio lo requiera.
+
+<figure>
+  <Image src={capasEs} alt="Diagrama por capas de MeetPulse Desktop: tu equipo, datos locales, IA local, captura y nube opcional (Vercel AI Gateway)" width={1200} loading="lazy" />
+  <figcaption>Figura 1 — Capas de MeetPulse: solo la nube opcional envía datos fuera; las otras cuatro capas viven en tu equipo.</figcaption>
+</figure>
+
+## El flujo de la solución
+
+Como bien se ha dicho en los puntos previos **MeetPulse** utiliza una estrategia híbrida para realizar su trabajo, permitiendo que los usuarios escojan si quieren utilizar todo 100% en local, todo 100% en la nube o decidir que quieren dejar en su equipo y quieren que salga a la nube dejando la decisión completamente a disposición del usuario.
+
+<figure>
+  <Image src={meetPulseFlow} alt="Diagrama de flujo de MeetPulse explicando el proceso end to end, desde escucha hasta el análisis final" width={1200} loading="lazy" />
+  <figcaption>Figura 2 — Flujo de MeetPulse: tú escoges que debe salir a internet y qué se queda en bajo tu control</figcaption>
+</figure>
+
+El flujo representado en el diagrama, a detalle se ve así:
+
+1. **Captura y mezcla**: Micrófono y audio del sistema entran en paralelo a un motor de procesamiento; el aduio se mezcla y el motor de voz deja que solo pase el habla.
+2. **Transcripción**: En local utiliza Whisper o Parakeet que convierten el habla en texto de forma casi instantánea. Cuando es aceptable salir a la nube es recomendable utilizar modelos dedicados a transcripción tales como **MICROSOFT MAI TRANSCRIBE 2** que me ha dado excelentes resultados.
+3. **Datos locales**: Reuniones, transcripciones y resúmenes se guardan en una base de datos local SQLite dentro de tu equipo, sin cuentas adicionales.
+4. **Insights y Meety**: Resumen, decisiones, chat con citas y búsqueda pueden acceder a esta data. Como propuesta de valor adicional **Meety** (El asistente de reuniones en vivo de MeetPulse) también tiene un modo **Coach** que funciona durante la reunión en vivo, permitiendo que te apoye con decisiones, puntos que no quedan claros y te da sugerencias de como abordar cada caso.
+5. **IA Local**: Ollama o llama.cpp permiten ejecutar modelos de IA como Whisper o Parakeet en tu equipo. Además también permite ejecutar modelos de IA generativa tales como QWEN o Gemma para realizar análisis de transcripciones y chatear con Meety.
+6. **Nube 100% opcional**: Si eliges un modelo en nube, ya sea, solo transcripción o análisis de reunión el contenido sale a través de Vercel AI Gateway con una cuenta de tu propiedad.
+
+## Arquitectura de la solución
+
+MeetPulse es una app Tauri 2. La interfaz está construida con NextJS utilizando React y TypeScript, renderiza en la WebView del sistema y todo lo pesado vive en un núcleo en RUST. No hay servicio backend separado.
+
+<figure>
+  <Image src={meetPulseArchitecture} alt="Diagrama de Arquitectura de MeetPulse, explicando como interactúa cada componente de MeetPulse" width={1200} loading="lazy" />
+  <figcaption>Figura 3 — Arquitectura de MeetPulse: Comprendiendo como interactúa cada componente del sistema</figcaption>
+</figure>
+
+Las capas del diagrama corresponden a lo siguiente:
+
+1. **Interfaz**: NextJS y React dentro del WebView de Tauri; nunca tocan audios ni modelos.
+2. **Núcleo Rust**: Recibe comandos con `invoke`, emite progreso con `emit` y reúne audio, transcripción, resumen y datos.
+3. **SQLite**: Reuniones, transcripciones, chats e índices vectoriales (FTS5 y embeddings e5).
+4. **llama-helper**: El núcleo para ejecutar modelos locales en el dispositivo.
+5. **Vercel AI Gateway**: Única puerta hacia la nube, activa solo si el usuario escoge el modo remoto.
+
+## Pruébalo hoy
+
+MeetPulse es gratis, no requiere cuenta y no tiene límite de reuniones ni de horas. Si tienes Windows 10 u 11 (64 bits), puedes estar grabando tu próxima reunión en dos minutos:
+
+1. Descarga el instalador desde [meetpulse.vicentejorquera.dev](https://meetpulse.vicentejorquera.dev/) o directamente [MeetPulse_x64-setup.exe desde GitHub Releases](https://github.com/VicenteJ20/meetpulse-app/releases/latest/download/MeetPulse_x64-setup.exe).
+2. Abre la app y sigue la bienvenida: permisos de audio y descarga de un modelo (Whisper pequeño basta para empezar).
+3. Pulsa **Grabar** en Inicio. Lo demás ocurre en tu equipo.
+
+Sin cuenta, sin suscripción, sin bots en la llamada. Si después quieres nube, conectas tu propia clave de Vercel AI Gateway y tú decides qué sale de tu PC. Si Windows SmartScreen avisa al instalar, pulsa «Más información» y luego «Ejecutar de todos modos» — los instaladores aún no tienen firma digital.
+
+¿Prefieres ver el código primero? [Todo está en GitHub](https://github.com/VicenteJ20/meetpulse-app).
+
+## Qué viene después
+
+MeetPulse está en Windows hoy; macOS y Linux están en camino, y los instaladores aún no tienen firma digital (SmartScreen lo dirá, y ya sabes que es seguro). La importación de audios para retranscribir reuniones antiguas está en beta. Y sí: acepto issues y PRs en [GitHub](https://github.com/VicenteJ20/meetpulse-app).
+
+Pero más allá de la hoja de ruta, la apuesta de MeetPulse es simple: tus reuniones son tuyas. La IA dejó de necesitar un servidor para ser útil; ahora el servidor es una elección, no un requisito. Si eso resuena contigo, descárgalo, grábate tu próxima llamada y pregúntale lo que no quieras olvidar.
+
+Y si algo no funciona como esperabas, cuéntamelo — prefiero arreglarlo que defenderlo.
