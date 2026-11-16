@@ -6,7 +6,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://vicentejorquera.dev',
+  // Pre-production (QA) domain on Cloudflare Pages — switch back to https://vicentejorquera.dev when the custom domain goes live
+site: 'https://vicentejorquera-portfolio.pages.dev',
 
   // i18n: English is the primary language, served at the root (/).
   // Spanish is served under /es/. Switch via the header language toggle.

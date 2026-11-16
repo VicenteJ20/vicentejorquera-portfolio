@@ -10,7 +10,8 @@
 
 export const SITE = {
   name: 'Vicente Jorquera',
-  url: 'https://vicentejorquera.dev',
+  /** Pre-production (QA) domain on Cloudflare Pages — use the custom domain when it goes live */
+  url: 'https://vicentejorquera-portfolio.pages.dev',
   /** Browser tab + SEO default title (keep ≤ 60 chars for search/social) */
   defaultTitle: 'Vicente Jorquera — Software Architect (Architecture & AI)',
   /** Shown next to the name in the header/footer */

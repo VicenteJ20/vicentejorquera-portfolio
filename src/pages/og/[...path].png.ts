@@ -4,10 +4,11 @@
  *   /og/en/<slug>.png          — per blog post
  *   /og/es/<slug>.png          — por artículo
  *   /og/products/<slug>.png    — per product (shared by both languages)
- * Design: dark editorial card, blueprint grid, amber accent, Fraunces-ish serif fallback.
+ * Design: dark editorial card, amber accent, Fraunces-ish serif fallback, profile-photo avatar.
  */
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { SITE } from '../../consts';
 import { slugOf } from '../../utils/content';
@@ -52,6 +53,22 @@ export async function getStaticPaths() {
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** Host shown in the footer of every card (e.g. "vicentejorquera.dev") */
+const siteHost = new URL(SITE.url).host;
+
+/** Profile photo (same one as the header/favicon), masked to a circle */
+const AVATAR_SIZE = 44;
+const AVATAR_TOP = 552;
+const avatarPath = fileURLToPath(new URL('../../../public/1788373851761.webp', import.meta.url));
+const circleMask = Buffer.from(
+  `<svg width="${AVATAR_SIZE}" height="${AVATAR_SIZE}"><circle cx="${AVATAR_SIZE / 2}" cy="${AVATAR_SIZE / 2}" r="${AVATAR_SIZE / 2}" fill="#fff"/></svg>`
+);
+const avatar = await sharp(avatarPath)
+  .resize(AVATAR_SIZE, AVATAR_SIZE)
+  .composite([{ input: circleMask, blend: 'dest-in' }])
+  .png()
+  .toBuffer();
+
 /** Greedy word wrap for the SVG text */
 function wrap(text: string, maxChars: number, maxLines: number): string[] {
   const words = text.split(/\s+/);
@@ -92,9 +109,6 @@ export const GET: APIRoute = async ({ props }) => {
 
   const svg = `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse">
-      <path d="M 46 0 H 0 V 46" fill="none" stroke="rgba(233,231,222,0.06)" stroke-width="1"/>
-    </pattern>
     <radialGradient id="glow" cx="0.8" cy="0.1" r="0.9">
       <stop offset="0" stop-color="#b3c16b" stop-opacity="0.2"/>
       <stop offset="1" stop-color="#b3c16b" stop-opacity="0"/>
@@ -106,7 +120,6 @@ export const GET: APIRoute = async ({ props }) => {
   </defs>
 
   <rect width="1200" height="630" fill="#131416"/>
-  <rect width="1200" height="630" fill="url(#grid)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
   <rect x="0" y="0" width="1200" height="3" fill="url(#accentBar)"/>
 
@@ -120,15 +133,16 @@ export const GET: APIRoute = async ({ props }) => {
   <!-- Tags -->
   <text x="72" y="${Math.min(tagsY, 480)}" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="21" letter-spacing="1" fill="#b3c16b" fill-opacity="0.9">${esc(tagsLine)}</text>
 
-  <!-- Footer row -->
+  <!-- Footer row — avatar is composited from the site's photo afterwards -->
   <line x1="72" y1="540" x2="1128" y2="540" stroke="rgba(233,231,222,0.14)" stroke-width="1"/>
-  <rect x="72" y="558" width="34" height="34" rx="8" fill="#b3c16b"/>
-  <text x="89" y="582" font-family="Georgia, 'DejaVu Serif', serif" font-weight="700" font-size="21" fill="#1e2410" text-anchor="middle">V</text>
-  <text x="126" y="581" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="1" fill="#a3a199">VICENTE JORQUERA</text>
-  <text x="1128" y="581" text-anchor="end" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="1" fill="#a3a199">vicentejorquera.dev</text>
+  <text x="130" y="581" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="1" fill="#a3a199">VICENTE JORQUERA</text>
+  <text x="1128" y="581" text-anchor="end" font-family="'Courier New', 'DejaVu Sans Mono', monospace" font-size="19" letter-spacing="1" fill="#a3a199">${esc(siteHost)}</text>
 </svg>`;
 
-  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  const png = await sharp(Buffer.from(svg))
+    .composite([{ input: avatar, left: 72, top: AVATAR_TOP }])
+    .png()
+    .toBuffer();
   return new Response(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',

@@ -1,10 +1,10 @@
-/* vicentejorquera.dev — humans.txt */
+/* vicentejorquera-portfolio.pages.dev — humans.txt */
 
 Vicente Jorquera
 Software Architect — Architecture & AI Consulting
 Chile (UTC-3/4)
 
-Site: https://vicentejorquera.dev
+Site: https://vicentejorquera-portfolio.pages.dev
 Mail: contacto@vicentejorquera.dev
 GitHub: https://github.com/VicenteJ20
 
