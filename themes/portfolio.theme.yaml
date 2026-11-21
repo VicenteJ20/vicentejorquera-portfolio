@@ -8,7 +8,7 @@ fonts:
   serif: "'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif"
   sans: "'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"
 light:
-  panel-a: "#f1efe9"        # --surface-2
+  panel-a: "#faf9f6"        # --bg (fondo de página, sin cajas beige en claro)
   panel-b: "#ffffff"        # --surface
   panel-stroke: "#e4e1d8"   # --line
   node-bg: "#ffffff"
