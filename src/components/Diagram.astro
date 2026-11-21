@@ -63,7 +63,11 @@ const clean = (raw?: string) =>
     raw
         ?.replace(/(<g [^>]*?) tabindex="0"/g, "$1")
         .replace(/(<g [^>]*?) role="button"( aria-label="[^"]*")?/g, "$1")
-        .replace(/(<svg [^>]*class="dgm"[^>]*?) role="group"/, '$1 role="img"');
+        .replace(/(<svg [^>]*class="dgm"[^>]*?) role="group"/, '$1 role="img"')
+        // ClientRouter re-creates every <script> of the new page (innerHTML → new HTML <script>). For the runtime inside the SVG that
+        // yields entity-escaped code (&amp;&amp;) and a SyntaxError on each navigation. `data-astro-exec` tells it to leave them alone;
+        // setup() below starts the runtime itself for SVGs that arrive through a swap.
+        .replace(/<script>/g, '<script data-astro-exec="">');
 
 // `<project>/<diagram>` → src/diagrams/<project>/<lang>/assets/<diagram>.svg (falls back to the `en` folder)
 const slash = name.lastIndexOf("/");
@@ -175,6 +179,13 @@ const t =
                 </div>
             )
         }
+        <script is:inline>
+            (function () {
+                var m = document.documentElement.classList.contains("dark") ? "dark" : "light";
+                var st = document.currentScript && document.currentScript.parentElement;
+                if (st) st.querySelectorAll("svg.dgm").forEach(function (s) { s.setAttribute("data-mode", m); });
+            })();
+        </script>
     </div>
     {caption && <figcaption>{caption}</figcaption>}
 </figure>
@@ -595,17 +606,38 @@ const t =
     };
     syncMode();
     new MutationObserver(syncMode).observe(root, { attributes: true, attributeFilter: ["class"] });
+    // ClientRouter (view transitions) swaps the body without re-running this module: new SVGs would keep following the OS theme
+    // (their own prefers-color-scheme fallback) instead of the site's until something toggles <html class="dark">.
+    document.addEventListener("astro:after-swap", syncMode);
+    document.addEventListener("visibilitychange", () => document.querySelectorAll<HTMLElement & { _dgmRefresh?: () => void }>(".dgm-fig").forEach((f) => f._dgmRefresh?.()));
+
+    // The runtime embedded in each exported SVG is a <script> inside the <svg>. It runs when the browser parses the page, but NOT
+    // for SVGs that arrive through a ClientRouter swap (they are inert DOM) → no hover/steps API. Run it again for those.
+    const ensureRuntime = (svg: SVGSVGElement) => {
+        if ((svg as unknown as { dgm?: unknown }).dgm) return;
+        const code = svg.querySelector("script")?.textContent;
+        if (!code) return;
+        try {
+            new Function("__svg", code.replace("document.currentScript?.ownerSVGElement||document.documentElement", "__svg"))(svg);
+        } catch (e) {
+            console.warn("[Diagram] could not start the SVG runtime", e);
+        }
+    };
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     type Fig = HTMLElement & { _dgmRefresh?: () => void; _dgmCenter?: () => void };
 
     // 2) scenario controls (real buttons) + autoplay
     type Api = { show: (k: number, o?: { stagger?: number; onGroup?: (ids: string[], i: number, n: number) => void }) => void; current: () => number };
-    const figures = Array.from(document.querySelectorAll<Fig>(".dgm-fig"));
-    figures.forEach((fig) => {
+    const setup = () => {
+      syncMode();
+      document.querySelectorAll<Fig>(".dgm-fig").forEach((fig) => {
+        if (fig.dataset.dgmInit) return; // already wired (initial load fires both setup() and astro:page-load)
+        fig.dataset.dgmInit = "1";
         const stage = fig.querySelector<HTMLElement>(".dgm-stage")!;
         // wide + (optional) phone SVG: both are kept in the same step, the visible one is the one the reader sees
         const svgs = Array.from(stage.querySelectorAll<SVGSVGElement>("svg.dgm"));
+        svgs.forEach(ensureRuntime);
         const tabs = Array.from(stage.querySelectorAll<HTMLButtonElement>(".dgm-tab"));
         if (!svgs.length || !tabs.length) return;
         const tabsEl = stage.querySelector<HTMLElement>(".dgm-tabs")!;
@@ -750,7 +782,6 @@ const t =
         });
         stage.addEventListener("focusin", () => ((engaged = true), progress()));
         stage.addEventListener("focusout", () => ((engaged = false), progress()));
-        document.addEventListener("visibilitychange", progress);
         new IntersectionObserver(
             (es) => {
                 visible = es.some((e) => e.isIntersecting);
@@ -762,7 +793,10 @@ const t =
             { threshold: 0.2 },
         ).observe(fig);
         fig._dgmRefresh = progress;
-    });
+      });
+    };
+    setup();
+    document.addEventListener("astro:page-load", setup); // fires after every ClientRouter navigation
 
     // 3) full-screen viewer: the whole live stage (svgs + controls) is MOVED into the dialog and moved back on close
     const icon = (d: string) =>
@@ -780,7 +814,10 @@ const t =
         zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
     };
     const ensureDialog = (btn: HTMLElement) => {
-        if (dialog) return dialog;
+        if (dialog) {
+            if (!dialog.isConnected) document.body.appendChild(dialog); // body was swapped by ClientRouter
+            return dialog;
+        }
         const { close = "Close", zin = "Zoom in", zout = "Zoom out", fit = "Fit" } = btn.dataset;
         dialog = document.createElement("dialog");
         dialog.className = "dgm-dialog";
