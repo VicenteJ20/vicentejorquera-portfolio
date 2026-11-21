@@ -4,7 +4,10 @@ description: "Flujo completo de MeetPulse Desktop: captura, transcripción (loca
 direction: RIGHT
 font: mixed
 variants:
-  narrow: {}
+  narrow:            # phone version: vertical, one node per row where possible
+    nodes:
+      mai: { stackWith: null }
+      embeddings: { stackWith: null }
 nodes:
   - id: capture
     label: Motor de captura y mezcla

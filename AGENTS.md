@@ -20,12 +20,17 @@ shown with `src/components/Diagram.astro`. The site does **not** depend on dgm a
 |---|---|---|
 | `src/diagrams/<name>.<lang>.diagram.yaml` | **source** — edit this, then re-export | `dgm_write_diagram` |
 | `src/diagrams/<name>.<lang>.svg` | **interactive** export (hover/click, animated flow, steps, tooltips) — what `<Diagram>` shows | `dgm_render_diagram` `format=svg`, `save_to` |
+| `src/diagrams/<name>.<lang>.narrow.svg` | **phone** export (vertical layout, `variants.narrow` in the yaml) — `<Diagram>` swaps it in under 640 px | `dgm_render_diagram` `format=svg`, `variant=narrow`, `save_to` |
 | `public/diagrams/<name>.<lang>.png` | static export (social cards, RSS, fallbacks) | `dgm_render_diagram` `format=png`, `save_to`, `scale` 2 |
 
 - `<name>`: kebab-case and specific (`meetpulse-architecture`, not `diagram1`). `<lang>`: `en` or `es`.
 - **Both languages**: this is a bilingual site. For a post that exists in `en` and `es`, ask whether to produce both; keep the **same node ids**
   and translate labels, sublabels, notes, steps and captions (`…en…` / `…es…`). If only one language is asked, say the other is pending.
 - Export the **SVG as interactive** (do not pass `static=true`).
+- **Always make the phone version too.** Add `variants.narrow` to the yaml (`nodes.<id>.stackWith: null` to un-stack, shorter labels, `hide`),
+  render it with `variant=narrow`, look at the PNG and iterate until the canvas is **≤ 520 px wide** (the tool says `phone view` and warns),
+  then save it as `<name>.<lang>.narrow.svg`. Same node ids and step order as the wide one, in both languages. `<Diagram>` shows it
+  automatically under 640 px (no props needed); the wide one stays for tablets/desktop.
 - Rendering defaults come from `dgm.config.json` → theme **`portfolio`** (`themes/portfolio.theme.yaml`: site colours, light + dark).
   Don't pass `theme`/`mode` unless the user asks. Leave `mode=auto`, `font=mixed`. Aim for ≈ 1.5–3.5 : 1 proportions (the render tool
   reports it) and add `variants: { narrow: {} }` only if the user wants a phone-specific layout (the component shows the single wide SVG,
@@ -54,7 +59,9 @@ import Diagram from '../../../components/Diagram.astro';
 
 (`name` has no extension and no language suffix: `<Diagram>` picks `<name>.<lang>.svg` for the page's locale and falls back to `<name>.svg`.
 Put the `import` with the other imports at the top, once per file; reuse it for every diagram in that file.)
-Diagrams with `steps` get big real buttons (overview + one per step) and **autoplay** (cycles every 5 s once on screen; pauses on hover/focus
+UI (owned by `Diagram.astro`, don't restyle the SVG): a round expand button in the card's corner; one scrollable pill row with play/pause + one button per
+step (generated from the diagram's `steps`) and the step text — pinned on top on phones; the full-screen viewer has its own zoom group (− % +, the % toggles fit/100%)
+and close. Diagrams with `steps` get real buttons (overview + one per step) and **autoplay** (cycles every 5 s once on screen; pauses on hover/focus
 or when the reader picks a step; off with `prefers-reduced-motion`). Optional props: `lang="es"`, `minWidth={520}`, `maxWidth="720px"`,
 `autoplay={false}`, `interval={8}` (seconds per step). For a static image instead, use
 `<img src="/diagrams/<name>.<lang>.png" alt="…" loading="lazy" />` inside a `<figure>`.
