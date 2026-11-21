@@ -1,0 +1,103 @@
+type: architecture
+title: MeetPulse Desktop — architecture
+description: "How MeetPulse Desktop is built: a Tauri 2 app with a Next.js interface, a Rust core, local SQLite and llama.cpp, and an optional cloud gateway."
+direction: RIGHT
+font: mixed
+nodes:
+  - id: desktop
+    label: Your computer · MeetPulse Desktop
+    kind: onprem
+    children:
+      - id: webview
+        label: Tauri WebView
+        kind: group
+        children:
+          - id: interface
+            label: Interface
+            sublabel: Next.js · React · TypeScript
+            icon: lu-monitor
+            variant: stacked
+            tone: accent
+            badge: 1
+            description: Runs inside Tauri's WebView. It never touches audio or models; it only talks to the core.
+      - id: rustcore
+        label: Rust core · Tauri 2
+        kind: group
+        children:
+          - id: audio
+            label: Audio capture
+            sublabel: mic + system · cpal · VAD
+            icon: lu-mic
+            variant: stacked
+            badge: 2
+            description: Mixes microphone and system audio and lets only speech through.
+          - id: transcription
+            label: Transcription
+            sublabel: Whisper · Parakeet
+            icon: lu-languages
+            variant: stacked
+            badge: 3
+          - id: data
+            label: Data layer
+            sublabel: sqlx · migrations
+            icon: lu-hard-drive
+            variant: stacked
+            stackWith: summary
+            badge: 5
+          - id: summary
+            label: Summary & assistant
+            sublabel: templates · chat · coach
+            icon: lu-sparkles
+            variant: stacked
+            badge: 4
+      - id: local
+        label: Local resources
+        kind: group
+        children:
+          - id: llama
+            label: llama-helper
+            sublabel: llama.cpp · Gemma · Qwen
+            icon: lu-cpu
+            variant: stacked
+            tone: compute
+            description: Child process that runs the local models, driven through stdin/stdout.
+          - id: sqlite
+            label: SQLite
+            sublabel: meetings · FTS5 · e5 vectors
+            icon: lu-database
+            variant: stacked
+            tone: data
+            stackWith: llama
+            description: Meetings, transcripts, chats and vector indexes, in a file on your machine.
+  - id: cloud
+    label: Optional cloud
+    kind: cloud
+    children:
+      - id: vercel
+        label: Vercel AI Gateway
+        sublabel: HTTPS · your API key
+        icon: lu-cloud
+        variant: stacked
+        tone: network
+edges:
+  - { from: interface, to: audio, label: invoke · emit, both: true, flow: true }
+  - { from: audio, to: transcription, label: audio segments, flow: true }
+  - { from: transcription, to: summary, label: transcript, flow: true }
+  - { from: transcription, to: data, label: transcript }
+  - { from: data, to: sqlite, label: sqlx }
+  - { from: summary, to: llama, label: stdin · stdout }
+  - { from: rustcore, to: vercel, label: audio · text, style: dashed }
+legend:
+  - { style: solid, label: Always local }
+  - { style: dashed, label: Optional / cloud mode }
+variants:
+  narrow:                      # phone: vertical, Summary beside Data, llama-helper beside SQLite
+    nodes:
+      interface: { sublabel: Next.js · React }
+      audio: { sublabel: cpal · VAD }
+      transcription: { sublabel: Whisper · Parakeet }
+      data: { sublabel: sqlx }
+      summary: { label: Summary, sublabel: chat · coach }
+      llama: { sublabel: llama.cpp }
+      sqlite: { sublabel: FTS5 · e5 }
+      vercel: { sublabel: HTTPS }

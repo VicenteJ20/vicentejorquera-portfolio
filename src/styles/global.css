@@ -444,9 +444,9 @@ body {
 }
 .post-body figure { margin: 2em auto; }
 .post-body figcaption {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.55;
   color: var(--muted);
   text-align: center;
   margin-top: -1.2em;

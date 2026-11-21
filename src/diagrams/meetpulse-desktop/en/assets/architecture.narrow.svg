@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="dgm" viewBox="0 0 484 1396" width="484" height="1396" role="group" aria-label="MeetPulse Desktop — architecture"><title>MeetPulse Desktop — architecture</title><desc>How MeetPulse Desktop is built: a Tauri 2 app with a Next.js interface, a Rust core, local SQLite and llama.cpp, and an optional cloud gateway.</desc><defs><symbol id="d1i6rlws-lucide-monitor" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></g></symbol><symbol id="d1i6rlws-lucide-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/></g></symbol><symbol id="d1i6rlws-lucide-languages" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></g></symbol><symbol id="d1i6rlws-lucide-sparkles" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></g></symbol><symbol id="d1i6rlws-lucide-hard-drive" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 16h.01"/><path d="M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><path d="M21.946 12.013H2.054"/><path d="M6 16h.01"/></g></symbol><symbol id="d1i6rlws-lucide-cpu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v2"/><path d="M12 2v2"/><path d="M17 20v2"/><path d="M17 2v2"/><path d="M2 12h2"/><path d="M2 17h2"/><path d="M2 7h2"/><path d="M20 12h2"/><path d="M20 17h2"/><path d="M20 7h2"/><path d="M7 20v2"/><path d="M7 2v2"/><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/></g></symbol><symbol id="d1i6rlws-lucide-database" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></g></symbol><symbol id="d1i6rlws-lucide-cloud" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></g></symbol><marker id="dgm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1.5L9 5L0 8.5z"/></marker><marker id="dgm-arrow-r" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10 1.5L1 5L10 8.5z"/></marker></defs><style>
+.dgm{--panel-a:var(--dgm-panel-a,#faf9f6);--panel-b:var(--dgm-panel-b,#ffffff);--panel-stroke:var(--dgm-panel-stroke,#e4e1d8);--node-bg:var(--dgm-node-bg,#ffffff);--stroke:var(--dgm-stroke,#a09d90);--text:var(--dgm-text,#1c1b18);--muted:var(--dgm-muted,#64625c);--edge:var(--dgm-edge,#5b594f);--accent:var(--dgm-accent,#556b2f);--flow:var(--dgm-flow,#c98a1b);--label-bg:var(--dgm-label-bg,#faf9f6);--icon-ink:var(--dgm-icon-ink,#46541f);--tone-compute:var(--dgm-tone-compute,#dfe4c4);--tone-data:var(--dgm-tone-data,#cfdccb);--tone-network:var(--dgm-tone-network,#ebdfb9);--tone-neutral:var(--dgm-tone-neutral,#e7e5da);--tone-accent:var(--dgm-tone-accent,#d3dca3);--tone-ok:var(--dgm-tone-ok,#d4e5d0);--tone-warn:var(--dgm-tone-warn,#f2e2b6);--tone-danger:var(--dgm-tone-danger,#f2cfc8);--tone-info:var(--dgm-tone-info,#d3deea)}@media (prefers-color-scheme:dark){.dgm:not([data-mode=light]){--panel-a:var(--dgm-dark-panel-a,#201f21);--panel-b:var(--dgm-dark-panel-b,#1a1b1d);--panel-stroke:var(--dgm-dark-panel-stroke,#39393e);--node-bg:var(--dgm-dark-node-bg,#27262a);--stroke:var(--dgm-dark-stroke,#6c6c72);--text:var(--dgm-dark-text,#e8e7e0);--muted:var(--dgm-dark-muted,#a2a096);--edge:var(--dgm-dark-edge,#a2a096);--accent:var(--dgm-dark-accent,#b3c16b);--flow:var(--dgm-dark-flow,#e3b457);--label-bg:var(--dgm-dark-label-bg,#131416);--icon-ink:var(--dgm-dark-icon-ink,#ccd78e);--tone-compute:var(--dgm-dark-tone-compute,#4d5a1f);--tone-data:var(--dgm-dark-tone-data,#3f5a45);--tone-network:var(--dgm-dark-tone-network,#6a5a2a);--tone-neutral:var(--dgm-dark-tone-neutral,#4a4a3a);--tone-accent:var(--dgm-dark-tone-accent,#667a22);--tone-ok:var(--dgm-dark-tone-ok,#3f6b4d);--tone-warn:var(--dgm-dark-tone-warn,#8a6a2c);--tone-danger:var(--dgm-dark-tone-danger,#8a4a40);--tone-info:var(--dgm-dark-tone-info,#3f5370)}}.dgm[data-mode=dark]{--panel-a:var(--dgm-dark-panel-a,#201f21);--panel-b:var(--dgm-dark-panel-b,#1a1b1d);--panel-stroke:var(--dgm-dark-panel-stroke,#39393e);--node-bg:var(--dgm-dark-node-bg,#27262a);--stroke:var(--dgm-dark-stroke,#6c6c72);--text:var(--dgm-dark-text,#e8e7e0);--muted:var(--dgm-dark-muted,#a2a096);--edge:var(--dgm-dark-edge,#a2a096);--accent:var(--dgm-dark-accent,#b3c16b);--flow:var(--dgm-dark-flow,#e3b457);--label-bg:var(--dgm-dark-label-bg,#131416);--icon-ink:var(--dgm-dark-icon-ink,#ccd78e);--tone-compute:var(--dgm-dark-tone-compute,#4d5a1f);--tone-data:var(--dgm-dark-tone-data,#3f5a45);--tone-network:var(--dgm-dark-tone-network,#6a5a2a);--tone-neutral:var(--dgm-dark-tone-neutral,#4a4a3a);--tone-accent:var(--dgm-dark-tone-accent,#667a22);--tone-ok:var(--dgm-dark-tone-ok,#3f6b4d);--tone-warn:var(--dgm-dark-tone-warn,#8a6a2c);--tone-danger:var(--dgm-dark-tone-danger,#8a4a40);--tone-info:var(--dgm-dark-tone-info,#3f5370)}
+.dgm{font-family:var(--dgm-sans,'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif);color:var(--text)}
+.dgm text{fill:var(--text);font-size:12.5px}
+.dgm .tag{font-size:9px;letter-spacing:.08em;fill:var(--muted)}
+.dgm .head{font-weight:600}
+.dgm .sub{font-size:10.5px;fill:var(--muted)}
+.dgm .note{font-family:var(--dgm-serif,'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif);font-size:12px;fill:var(--muted)}
+.dgm .title{font-family:var(--dgm-serif,'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif);font-size:15px;font-style:italic}
+.dgm .cont rect{stroke-width:1}
+.dgm .cont.even rect{fill:var(--panel-a);stroke:var(--panel-stroke)}
+.dgm .cont.odd rect{fill:var(--panel-b);stroke:var(--stroke);stroke-dasharray:4 3}
+.dgm .node rect,.dgm .node polygon{fill:var(--node-bg);stroke:var(--stroke);stroke-width:1}
+.dgm .node .rowline{stroke:var(--panel-stroke);stroke-width:1}
+.dgm .node .field{font-size:11.5px}
+.dgm .node .ftype{font-size:10.5px;fill:var(--muted)}
+.dgm .node .key{font-size:8.5px;font-weight:700;fill:var(--accent)}
+.dgm .endl{font-size:10.5px;fill:var(--muted);font-family:var(--dgm-serif,'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif);font-style:italic}
+.dgm .ico{color:var(--icon-ink)}
+.dgm .node.stacked rect{fill:transparent;stroke:transparent}
+.dgm .badge circle{stroke:none}
+.dgm .badge path{fill:none;stroke:var(--icon-ink);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.dgm .badge text{fill:var(--icon-ink);font-size:13px;text-anchor:middle;font-family:var(--dgm-serif,'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif);font-style:italic}
+.dgm .t-compute circle{fill:var(--tone-compute)}.dgm .tn-compute.cont rect,.dgm .tn-compute.node rect,.dgm .tn-compute.node polygon{fill:var(--tone-compute)}.dgm .t-data circle{fill:var(--tone-data)}.dgm .tn-data.cont rect,.dgm .tn-data.node rect,.dgm .tn-data.node polygon{fill:var(--tone-data)}.dgm .t-network circle{fill:var(--tone-network)}.dgm .tn-network.cont rect,.dgm .tn-network.node rect,.dgm .tn-network.node polygon{fill:var(--tone-network)}.dgm .t-neutral circle{fill:var(--tone-neutral)}.dgm .tn-neutral.cont rect,.dgm .tn-neutral.node rect,.dgm .tn-neutral.node polygon{fill:var(--tone-neutral)}.dgm .t-accent circle{fill:var(--tone-accent)}.dgm .tn-accent.cont rect,.dgm .tn-accent.node rect,.dgm .tn-accent.node polygon{fill:var(--tone-accent)}.dgm .t-ok circle{fill:var(--tone-ok)}.dgm .tn-ok.cont rect,.dgm .tn-ok.node rect,.dgm .tn-ok.node polygon{fill:var(--tone-ok)}.dgm .t-warn circle{fill:var(--tone-warn)}.dgm .tn-warn.cont rect,.dgm .tn-warn.node rect,.dgm .tn-warn.node polygon{fill:var(--tone-warn)}.dgm .t-danger circle{fill:var(--tone-danger)}.dgm .tn-danger.cont rect,.dgm .tn-danger.node rect,.dgm .tn-danger.node polygon{fill:var(--tone-danger)}.dgm .t-info circle{fill:var(--tone-info)}.dgm .tn-info.cont rect,.dgm .tn-info.node rect,.dgm .tn-info.node polygon{fill:var(--tone-info)}
+.dgm .edge .line{fill:none;stroke:var(--edge);stroke-width:1.2}
+.dgm .edge.dashed .line{stroke-dasharray:5 4}
+.dgm .edge .hit{fill:none;stroke:transparent;stroke-width:12}
+.dgm marker path{fill:var(--edge)}
+.dgm .elabel rect{fill:var(--label-bg);opacity:.92}
+.dgm .elabel text{font-size:10.5px;fill:var(--muted)}
+.dgm .mark circle{fill:var(--accent)}
+.dgm .mark text{fill:var(--panel-b);font-size:9.5px;font-weight:600;text-anchor:middle;font-family:var(--dgm-sans,'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif)}
+.dgm .bdg text{font-size:10px}
+.dgm .legend text{font-size:11px;fill:var(--muted)}
+.dgm .legend-rule{stroke:var(--panel-stroke);stroke-width:1}
+.dgm .leader{fill:none;stroke:var(--muted);stroke-width:.8;stroke-dasharray:1.5 2.5}
+
+.dgm .edge .pkt{fill:none;stroke:var(--flow);stroke-width:3;stroke-linecap:round;stroke-dasharray:0.1 14;animation:dgm-flow 1.1s linear infinite}
+@keyframes dgm-flow{to{stroke-dashoffset:-14.1}}
+.dgm .el{transition:opacity .3s}
+.dgm .el.now{animation:dgm-now 1.2s ease-out}
+@keyframes dgm-now{0%{filter:drop-shadow(0 0 7px var(--accent))}100%{filter:drop-shadow(0 0 0 transparent)}}
+.dgm .node,.dgm .cont,.dgm .edge{cursor:pointer}
+.dgm.dim .el:not(.hl):not(.ctx){opacity:.16}
+.dgm.dim .note-g,.dgm.dim .leader{opacity:.5}
+.dgm .node.hl rect,.dgm .node.hl polygon{stroke:var(--accent);stroke-width:1.8}
+.dgm .node.stacked:hover rect{stroke:var(--panel-stroke)}
+.dgm .cont.hl rect{stroke:var(--accent)}
+.dgm .edge.hl .line{stroke:var(--accent);stroke-width:1.8}
+.dgm .edge.hl marker path{fill:var(--accent)}
+.dgm .el:focus{outline:none}.dgm .el:focus-visible rect{stroke:var(--accent);stroke-width:2}
+.dgm .btn rect{fill:var(--node-bg);stroke:var(--stroke);cursor:pointer}
+.dgm .btn:hover rect{stroke:var(--accent)}
+.dgm .btn text{text-anchor:middle;font-size:13px}
+.dgm .btn.off{opacity:.35;pointer-events:none}
+.dgm .step-label{font-family:var(--dgm-serif,'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif);font-size:12.5px}
+.dgm .tip rect{fill:var(--text);opacity:.94}.dgm .tip text{fill:var(--panel-b);font-size:11px}
+@media (prefers-reduced-motion:reduce){.dgm .edge .pkt{animation:none}.dgm .el{transition:none}}
+</style><g transform="translate(16 16)"><text class="title" x="0" y="18">MeetPulse Desktop — architecture</text><g transform="translate(0 44)"><g class="el cont even" data-id="desktop"><rect x="12" y="12" width="374.5" height="932" rx="8"/><text class="tag" x="24" y="29">ON-PREMISES</text><text class="head" x="24" y="46">Your computer · MeetPulse Desktop</text></g><g class="el cont odd" data-id="webview" data-parent="desktop"><rect x="210" y="58" width="141" height="150" rx="8"/><text class="head" x="222" y="83">Tauri WebView</text></g><g class="el cont odd" data-id="rustcore" data-parent="desktop"><rect x="63.5" y="274" width="307" height="438" rx="8"/><text class="head" x="75.5" y="299">Rust core · Tauri 2</text></g><g class="el cont odd" data-id="local" data-parent="desktop"><rect x="55.5" y="778" width="287" height="150" rx="8"/><text class="head" x="67.5" y="803">Local resources</text></g><g class="el cont even" data-id="cloud"><rect x="265" y="1122" width="175" height="150" rx="8"/><text class="tag" x="277" y="1139">CLOUD</text><text class="head" x="277" y="1156">Optional cloud</text></g><g class="el edge" data-id="interface-&gt;audio" data-from="interface" data-to="audio"><path class="hit" d="M280.5 192L280.5 320"/><path class="line" d="M280.5 192L280.5 320" marker-end="url(#dgm-arrow)" marker-start="url(#dgm-arrow-r)"/><path class="pkt" d="M280.5 192L280.5 320"/><g class="elabel"><rect x="189.5" y="233" width="89" height="16" rx="3"/><text x="234" y="244.5" text-anchor="middle">invoke · emit</text></g></g><g class="el edge" data-id="audio-&gt;transcription" data-from="audio" data-to="transcription"><path class="hit" d="M280.5 408L280.5 464"/><path class="line" d="M280.5 408L280.5 464" marker-end="url(#dgm-arrow)"/><path class="pkt" d="M280.5 408L280.5 464"/><g class="elabel"><rect x="183.5" y="428" width="95" height="16" rx="3"/><text x="231" y="439.5" text-anchor="middle">audio segments</text></g></g><g class="el edge" data-id="transcription-&gt;summary" data-from="transcription" data-to="summary"><path class="hit" d="M280.5 552L280.5 557Q280.5 562 275.5 562L275 562Q269.5 562 269.5 567.5L269.5 590Q269.5 598 261.5 598L130 598Q125 598 125 603L125 608"/><path class="line" d="M280.5 552L280.5 557Q280.5 562 275.5 562L275 562Q269.5 562 269.5 567.5L269.5 590Q269.5 598 261.5 598L130 598Q125 598 125 603L125 608" marker-end="url(#dgm-arrow)"/><path class="pkt" d="M280.5 552L280.5 557Q280.5 562 275.5 562L275 562Q269.5 562 269.5 567.5L269.5 590Q269.5 598 261.5 598L130 598Q125 598 125 603L125 608"/><g class="elabel"><rect x="196.5" y="572" width="71" height="16" rx="3"/><text x="232" y="583.5" text-anchor="middle">transcript</text></g></g><g class="el edge" data-id="transcription-&gt;data" data-from="transcription" data-to="data"><path class="hit" d="M280.5 552L280.5 608"/><path class="line" d="M280.5 552L280.5 608" marker-end="url(#dgm-arrow)"/><g class="elabel"><rect x="283.5" y="572" width="71" height="16" rx="3"/><text x="319" y="583.5" text-anchor="middle">transcript</text></g></g><g class="el edge" data-id="data-&gt;sqlite" data-from="data" data-to="sqlite"><path class="hit" d="M280.5 696L280.5 761Q280.5 763 282.5 763L282.5 763Q284.5 763 284.5 765L284.5 824"/><path class="line" d="M280.5 696L280.5 761Q280.5 763 282.5 763L282.5 763Q284.5 763 284.5 765L284.5 824" marker-end="url(#dgm-arrow)"/><g class="elabel"><rect x="283.5" y="737" width="36" height="16" rx="3"/><text x="301.5" y="748.5" text-anchor="middle">sqlx</text></g></g><g class="el edge" data-id="summary-&gt;llama" data-from="summary" data-to="llama"><path class="hit" d="M125 696L125 824"/><path class="line" d="M125 696L125 824" marker-end="url(#dgm-arrow)"/><g class="elabel"><rect x="28" y="737" width="95" height="16" rx="3"/><text x="75.5" y="748.5" text-anchor="middle">stdin · stdout</text></g></g><g class="el edge dashed" data-id="rustcore-&gt;vercel" data-from="rustcore" data-to="vercel"><path class="hit" d="M290.5 712L290.5 719.5Q290.5 727 298 727L344.5 727Q352.5 727 352.5 735L352.5 1168"/><path class="line" d="M290.5 712L290.5 719.5Q290.5 727 298 727L344.5 727Q352.5 727 352.5 735L352.5 1168" marker-end="url(#dgm-arrow)"/><g class="elabel"><rect x="265.5" y="1025" width="83" height="16" rx="3"/><text x="307" y="1036.5" text-anchor="middle">audio · text</text></g></g><g class="el node stacked" tabindex="0" role="button" aria-label="Interface" data-id="interface" data-parent="webview" data-desc="Runs inside Tauri's WebView. It never touches audio or models; it only talks to the core."><rect x="226" y="104" width="109" height="88" rx="8"/><use href="#d1i6rlws-lucide-monitor" xlink:href="#d1i6rlws-lucide-monitor" x="260.5" y="112" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="280.5" y="168">Interface</text><text class="sub" text-anchor="middle" x="280.5" y="182">Next.js · React</text><g class="mark bdg" transform="translate(256.5 114)"><circle r="9"/><text y="3.8">1</text></g></g><g class="el node stacked" tabindex="0" role="button" aria-label="Audio capture" data-id="audio" data-parent="rustcore" data-desc="Mixes microphone and system audio and lets only speech through."><rect x="223.5" y="320" width="114" height="88" rx="8"/><use href="#d1i6rlws-lucide-mic" xlink:href="#d1i6rlws-lucide-mic" x="260.5" y="328" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="280.5" y="384">Audio capture</text><text class="sub" text-anchor="middle" x="280.5" y="398">cpal · VAD</text><g class="mark bdg" transform="translate(256.5 330)"><circle r="9"/><text y="3.8">2</text></g></g><g class="el node stacked" tabindex="0" role="button" aria-label="Transcription" data-id="transcription" data-parent="rustcore"><rect x="217.5" y="464" width="126" height="88" rx="8"/><use href="#d1i6rlws-lucide-languages" xlink:href="#d1i6rlws-lucide-languages" x="260.5" y="472" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="280.5" y="528">Transcription</text><text class="sub" text-anchor="middle" x="280.5" y="542">Whisper · Parakeet</text><g class="mark bdg" transform="translate(256.5 474)"><circle r="9"/><text y="3.8">3</text></g></g><g class="el node stacked" tabindex="0" role="button" aria-label="Summary" data-id="summary" data-parent="rustcore"><rect x="79.5" y="608" width="91" height="88" rx="8"/><use href="#d1i6rlws-lucide-sparkles" xlink:href="#d1i6rlws-lucide-sparkles" x="105" y="616" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="125" y="672">Summary</text><text class="sub" text-anchor="middle" x="125" y="686">chat · coach</text><g class="mark bdg" transform="translate(101 618)"><circle r="9"/><text y="3.8">4</text></g></g><g class="el node stacked" tabindex="0" role="button" aria-label="Data layer" data-id="data" data-parent="rustcore"><rect x="234.5" y="608" width="92" height="88" rx="8"/><use href="#d1i6rlws-lucide-hard-drive" xlink:href="#d1i6rlws-lucide-hard-drive" x="260.5" y="616" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="280.5" y="672">Data layer</text><text class="sub" text-anchor="middle" x="280.5" y="686">sqlx</text><g class="mark bdg" transform="translate(256.5 618)"><circle r="9"/><text y="3.8">5</text></g></g><g class="el node stacked" tabindex="0" role="button" aria-label="llama-helper" data-id="llama" data-parent="local" data-desc="Child process that runs the local models, driven through stdin/stdout."><rect x="71.5" y="824" width="107" height="88" rx="8"/><use href="#d1i6rlws-lucide-cpu" xlink:href="#d1i6rlws-lucide-cpu" x="105" y="832" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="125" y="888">llama-helper</text><text class="sub" text-anchor="middle" x="125" y="902">llama.cpp</text></g><g class="el node stacked" tabindex="0" role="button" aria-label="SQLite" data-id="sqlite" data-parent="local" data-desc="Meetings, transcripts, chats and vector indexes, in a file on your machine."><rect x="242.5" y="824" width="84" height="88" rx="8"/><use href="#d1i6rlws-lucide-database" xlink:href="#d1i6rlws-lucide-database" x="264.5" y="832" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="284.5" y="888">SQLite</text><text class="sub" text-anchor="middle" x="284.5" y="902">FTS5 · e5</text></g><g class="el node stacked" tabindex="0" role="button" aria-label="Vercel AI Gateway" data-id="vercel" data-parent="cloud"><rect x="281" y="1168" width="143" height="88" rx="8"/><use href="#d1i6rlws-lucide-cloud" xlink:href="#d1i6rlws-lucide-cloud" x="332.5" y="1176" width="40" height="40" class="ico"/><text class="head" text-anchor="middle" x="352.5" y="1232">Vercel AI Gateway</text><text class="sub" text-anchor="middle" x="352.5" y="1246">HTTPS</text></g></g><g class="legend"><line class="legend-rule" x1="0" x2="450" y1="1336" y2="1336"/><g class="edge legend-item"><path class="line" d="M0 1350H34" marker-end="url(#dgm-arrow)"/></g><text x="44" y="1353.5">Always local</text><g class="edge legend-item dashed"><path class="line" d="M154 1350H188" marker-end="url(#dgm-arrow)"/></g><text x="198" y="1353.5">Optional / cloud mode</text></g></g><script><![CDATA[(function attach(svg) {
+  const w = svg;
+  if (w.__dgm) return;
+  w.__dgm = 1;
+  const els = Array.from(svg.querySelectorAll(".el"));
+  const byId = /* @__PURE__ */ new Map();
+  els.forEach((e) => byId.set(e.dataset.id, e));
+  const edges = els.filter((e) => e.classList.contains("edge"));
+  const parent = (id) => byId.get(id)?.dataset.parent || "";
+  const ancestors = (id) => {
+    const out = [];
+    for (let p = parent(id); p; p = parent(p)) out.push(p);
+    return out;
+  };
+  const inSubtree = (id, root) => id === root || ancestors(id).includes(root);
+  const apply = (hl) => {
+    const ctx = /* @__PURE__ */ new Set();
+    hl.forEach((id) => ancestors(id).forEach((a) => ctx.add(a)));
+    svg.classList.add("dim");
+    els.forEach((e) => {
+      const id = e.dataset.id;
+      e.classList.toggle("hl", hl.has(id));
+      e.classList.toggle("ctx", !hl.has(id) && ctx.has(id));
+    });
+  };
+  const clear = () => {
+    svg.classList.remove("dim");
+    els.forEach((e) => e.classList.remove("hl", "ctx"));
+  };
+  const related = (id) => {
+    const hl = /* @__PURE__ */ new Set([id]);
+    const el = byId.get(id);
+    if (!el) return hl;
+    if (el.classList.contains("edge")) {
+      hl.add(el.dataset.from);
+      hl.add(el.dataset.to);
+      return hl;
+    }
+    els.forEach((e) => {
+      if (!e.classList.contains("edge") && inSubtree(e.dataset.id, id)) hl.add(e.dataset.id);
+    });
+    const sub = new Set(hl);
+    edges.forEach((e) => {
+      const f = e.dataset.from;
+      const t = e.dataset.to;
+      if (sub.has(f) || sub.has(t)) {
+        hl.add(e.dataset.id);
+        hl.add(f);
+        hl.add(t);
+      }
+    });
+    return hl;
+  };
+  let steps = [];
+  try {
+    steps = JSON.parse(svg.getAttribute("data-steps") || "[]");
+  } catch {
+    steps = [];
+  }
+  let step = -1;
+  let pinned = "";
+  const label = svg.querySelector(".step-label");
+  const prev = svg.querySelector('.btn[data-act="prev"]');
+  const next = svg.querySelector('.btn[data-act="next"]');
+  let timers = [];
+  const cancel = () => {
+    timers.forEach((t) => clearTimeout(t));
+    timers = [];
+    svg.querySelectorAll(".now").forEach((e) => e.classList.remove("now"));
+  };
+  const showStep = (k, opts) => {
+    cancel();
+    step = Math.max(-1, Math.min(steps.length - 1, k));
+    pinned = "";
+    if (step < 0) clear();
+    else {
+      const hl = /* @__PURE__ */ new Set();
+      els.forEach((e) => {
+        const s = (e.dataset.steps || "").split(",");
+        if (s.includes(String(step))) hl.add(e.dataset.id);
+      });
+      const seq = steps[step].seq;
+      const gap = (opts?.stagger ?? 0) * 1e3;
+      if (gap > 0 && seq && seq.length > 1) {
+        const lit = /* @__PURE__ */ new Set();
+        apply(lit);
+        seq.forEach((group, i) => {
+          const reveal = () => {
+            svg.querySelectorAll(".now").forEach((e) => e.classList.remove("now"));
+            group.forEach((id) => lit.add(id));
+            apply(lit);
+            group.forEach((id) => byId.get(id)?.classList.add("now"));
+            opts?.onGroup?.(group, i, seq.length);
+          };
+          if (i === 0) reveal();
+          else timers.push(window.setTimeout(reveal, i * gap));
+        });
+      } else apply(hl);
+    }
+    if (label) label.textContent = step < 0 ? `Overview \xB7 ${steps.length} steps` : `${step + 1}/${steps.length} \xB7 ${steps[step].title}`;
+    prev?.classList.toggle("off", step < 0);
+    next?.classList.toggle("off", step >= steps.length - 1);
+  };
+  if (steps.length) showStep(-1);
+  w.dgm = { show: showStep, steps: () => steps, current: () => step, cancel };
+  const NS = "http://www.w3.org/2000/svg";
+  const tip = document.createElementNS(NS, "g");
+  tip.setAttribute("class", "tip");
+  tip.setAttribute("pointer-events", "none");
+  tip.style.display = "none";
+  svg.appendChild(tip);
+  const showTip = (el) => {
+    const d = el.dataset.desc;
+    if (!d) return;
+    const lines = [];
+    let cur = "";
+    d.split(/\s+/).forEach((word) => {
+      if ((cur + " " + word).length > 38) {
+        lines.push(cur);
+        cur = word;
+      } else cur = cur ? cur + " " + word : word;
+    });
+    if (cur) lines.push(cur);
+    const b = el.getBBox();
+    const tw = Math.max(...lines.map((l) => l.length)) * 5.9 + 16;
+    const th = lines.length * 14 + 10;
+    const vb = svg.viewBox.baseVal;
+    const x = Math.max(4, Math.min(b.x, vb.width - tw - 4));
+    const y = b.y + b.height + 8 + th > vb.height ? b.y - th - 8 : b.y + b.height + 8;
+    tip.innerHTML = "";
+    const r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", String(x));
+    r.setAttribute("y", String(y));
+    r.setAttribute("width", String(tw));
+    r.setAttribute("height", String(th));
+    r.setAttribute("rx", "4");
+    tip.appendChild(r);
+    lines.forEach((l, i) => {
+      const t = document.createElementNS(NS, "text");
+      t.setAttribute("x", String(x + 8));
+      t.setAttribute("y", String(y + 16 + i * 14));
+      t.textContent = l;
+      tip.appendChild(t);
+    });
+    tip.style.display = "";
+  };
+  let hover = "";
+  const elOf = (t) => t?.closest?.(".el");
+  svg.addEventListener("pointermove", (ev) => {
+    const el = elOf(ev.target);
+    const id = el?.dataset.id || "";
+    if (id === hover) return;
+    hover = id;
+    tip.style.display = "none";
+    if (step >= 0 || pinned) return;
+    if (id) {
+      apply(related(id));
+      showTip(el);
+    } else clear();
+  });
+  svg.addEventListener("pointerleave", () => {
+    hover = "";
+    tip.style.display = "none";
+    if (step < 0 && !pinned) clear();
+  });
+  svg.addEventListener("click", (ev) => {
+    const btn = ev.target.closest?.(".btn");
+    if (btn) {
+      showStep(step + (btn.dataset.act === "next" ? 1 : -1));
+      return;
+    }
+    if (step >= 0) return;
+    const el = elOf(ev.target);
+    const id = el?.dataset.id || "";
+    if (id && id !== pinned) {
+      pinned = id;
+      apply(related(id));
+    } else {
+      pinned = "";
+      clear();
+    }
+  });
+  svg.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") {
+      pinned = "";
+      showStep(-1);
+    } else if (steps.length && ev.key === "ArrowRight") showStep(step + 1);
+    else if (steps.length && ev.key === "ArrowLeft") showStep(step - 1);
+    else if ((ev.key === "Enter" || ev.key === " ") && elOf(ev.target)) {
+      ev.preventDefault();
+      elOf(ev.target).dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    }
+  });
+})(document.currentScript?.ownerSVGElement||document.documentElement)]]></script></svg>

@@ -4,7 +4,10 @@ description: "End-to-end flow of MeetPulse Desktop: capture, transcription (loca
 direction: RIGHT
 font: mixed
 variants:
-  narrow: {}
+  narrow:            # phone version: vertical, one node per row where possible
+    nodes:
+      mai: { stackWith: null }
+      embeddings: { stackWith: null }
 nodes:
   - id: capture
     label: Capture & mix engine

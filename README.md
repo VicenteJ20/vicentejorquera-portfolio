@@ -109,11 +109,11 @@ is installed at build time.
 ```mdx
 import Diagram from '../../../components/Diagram.astro';
 
-<Diagram name="meetpulse-architecture" caption="Figure 1. …" />   {/* src/diagrams/<name>.<lang>.svg */}
+<Diagram name="meetpulse-desktop/solution-flow" stagger={1.5} caption="Figure 1. …" />   {/* src/diagrams/<project>/<lang>/assets/<diagram>.svg */}
 ```
 
-Files: `src/diagrams/<name>.<lang>.diagram.yaml` (source), `src/diagrams/<name>.<lang>.svg` (interactive export),
-`public/diagrams/<name>.<lang>.png` (static). Default theme: `themes/portfolio.theme.yaml` (see `dgm.config.json`).
+Files: `src/diagrams/<project>/<lang>/editables/<diagram>.diagram.yaml` (source), `…/assets/<diagram>.svg` (interactive export) and `<diagram>.narrow.svg` (phone);
+PNG / static SVG only on request. Default theme: `themes/portfolio.theme.yaml` (see `dgm.config.json`).
 The full conventions — and how the agent asks where to place a diagram — are in [`AGENTS.md`](AGENTS.md).
 
 ## Adding a product

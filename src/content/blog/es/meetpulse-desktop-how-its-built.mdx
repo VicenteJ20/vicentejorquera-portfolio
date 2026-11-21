@@ -9,7 +9,6 @@ draft: false
 import { Image } from 'astro:assets';
 import Diagram from '../../../components/Diagram.astro';
 import capasEs from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-capas-es.webp';
-import meetPulseArchitecture from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-architecture-es.webp';
 
 MeetPulse es una aplicación de escritorio pensada que sus usuarios puedan grabar reuniones en tiempo real capturando el audio de su computador y micrófono. De esta manera, se vuelve agnóstico a la herramienta de reuniones con la que se está trabjando, No importa si es Microsoft Teams, Zoom, Google Meet, entre otros. MeetPulse lo captura sin problemas.
 
@@ -23,16 +22,11 @@ Hoy en día casi todo producto nuevo, ya sea, creado o no con IA nace como SaaS.
 
 > Vercel AI Gateway ofrece ZDR (AI Gateway Zero Data Retention (ZDR)) e indicadores No training (Proveedores indican que no utilizan los datos para entrenamiento). Esto se encuentra disponible en planes PRO de Vercel, es responsabilidad del usuario pagar su suscripción correspondiente para aprovechar estas características cuando el negocio lo requiera.
 
-<figure>
-  <Image src={capasEs} alt="Diagrama por capas de MeetPulse Desktop: tu equipo, datos locales, IA local, captura y nube opcional (Vercel AI Gateway)" width={1200} loading="lazy" />
-  <figcaption>Figura 1 — Capas de MeetPulse: solo la nube opcional envía datos fuera; las otras cuatro capas viven en tu equipo.</figcaption>
-</figure>
-
 ## El flujo de la solución
 
 Como bien se ha dicho en los puntos previos **MeetPulse** utiliza una estrategia híbrida para realizar su trabajo, permitiendo que los usuarios escojan si quieren utilizar todo 100% en local, todo 100% en la nube o decidir que quieren dejar en su equipo y quieren que salga a la nube dejando la decisión completamente a disposición del usuario.
 
-<Diagram name="meetpulse-flow" caption="Figura 2 (interactiva) — Flujo de MeetPulse: captura, transcripción (local o nube), almacenamiento, embeddings e Insights & Meety. Usa los botones de pasos para alternar entre 100% local, 100% nube e híbrido." />
+<Diagram name="meetpulse-desktop/solution-flow" stagger={1.5} caption="Figura 2 (interactiva) — Flujo de MeetPulse: captura, transcripción (local o nube), almacenamiento, embeddings e Insights & Meety. Usa los botones de pasos para alternar entre 100% local, 100% nube e híbrido." />
 
 El flujo representado en el diagrama, a detalle se ve así:
 
@@ -47,10 +41,7 @@ El flujo representado en el diagrama, a detalle se ve así:
 
 MeetPulse es una app Tauri 2. La interfaz está construida con NextJS utilizando React y TypeScript, renderiza en la WebView del sistema y todo lo pesado vive en un núcleo en RUST. No hay servicio backend separado.
 
-<figure>
-  <Image src={meetPulseArchitecture} alt="Diagrama de Arquitectura de MeetPulse, explicando como interactúa cada componente de MeetPulse" width={1200} loading="lazy" />
-  <figcaption>Figura 3 — Arquitectura de MeetPulse: Comprendiendo como interactúa cada componente del sistema</figcaption>
-</figure>
+<Diagram name="meetpulse-desktop/architecture" caption="Figura 3 (interactiva) — Arquitectura de MeetPulse: interfaz, núcleo Rust, SQLite, llama-helper y gateway cloud opcional." />
 
 Las capas del diagrama corresponden a lo siguiente:
 
