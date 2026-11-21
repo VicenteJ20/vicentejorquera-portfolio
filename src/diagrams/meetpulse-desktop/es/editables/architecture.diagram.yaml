@@ -72,6 +72,7 @@ nodes:
   - id: cloud
     label: Nube opcional
     kind: cloud
+    placement: below      # drawn under the computer, centred below Rust core (no extra column / scroll)
     children:
       - id: vercel
         label: Vercel AI Gateway
@@ -93,11 +94,11 @@ legend:
 variants:
   narrow:                      # phone: vertical, Summary beside Data, llama-helper beside SQLite
     nodes:
-      interface: { sublabel: Next.js · React }
-      audio: { sublabel: cpal · VAD }
-      transcription: { sublabel: Whisper · Parakeet }
-      data: { sublabel: sqlx }
-      summary: { label: Resumen, sublabel: chat · coach }
-      llama: { sublabel: llama.cpp }
-      sqlite: { sublabel: FTS5 · e5 }
-      vercel: { sublabel: HTTPS }
+      interface: { variant: card, sublabel: Next.js · React }
+      audio: { variant: card, sublabel: cpal · VAD }
+      transcription: { variant: card, sublabel: Whisper · Parakeet }
+      data: { variant: card, sublabel: sqlx }
+      summary: { variant: card, label: Resumen, sublabel: chat · coach }
+      llama: { variant: card, sublabel: llama.cpp }
+      sqlite: { variant: card, sublabel: FTS5 · e5 }
+      vercel: { variant: card, label: Vercel Gateway, sublabel: HTTPS }
