@@ -243,8 +243,8 @@ const t =
         .dgm-scroll {
             padding: 0.25rem;
         }
-        /* staggered flow: the vertical diagram scrolls inside its card so the view can follow the lit boxes */
-        .dgm-stage[data-guided][data-has-narrow] .dgm-frame .dgm-narrow {
+        /* the vertical diagram always gets the same bounded space and scrolls inside its card (also lets the staggered flow be followed) */
+        .dgm-stage[data-has-narrow] .dgm-frame .dgm-narrow {
             max-height: min(68vh, 640px);
             overflow-y: auto;
         }
@@ -553,7 +553,7 @@ const t =
         display: flex;
     }
     dialog.dgm-dialog .dgm-scroll,
-    dialog.dgm-dialog .dgm-stage[data-guided] .dgm-frame .dgm-narrow {
+    dialog.dgm-dialog .dgm-stage[data-has-narrow] .dgm-frame .dgm-narrow {
         flex: 1 1 auto;
         min-width: 0;
         max-height: none;
