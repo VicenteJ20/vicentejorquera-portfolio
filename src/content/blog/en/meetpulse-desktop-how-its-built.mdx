@@ -9,7 +9,6 @@ draft: false
 import { Image } from 'astro:assets';
 import Diagram from '../../../components/Diagram.astro';
 import capasEn from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-capas-en.webp';
-import meetPulseArchitecture from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-architecture-en.webp';
 
 MeetPulse is a desktop application designed so that users can record meetings in real time by capturing their computer's audio along with their microphone. This makes it agnostic to the meeting tool you're working with — it doesn't matter whether it's Microsoft Teams, Zoom, Google Meet, or anything else. MeetPulse captures it all without issue.
 
@@ -42,10 +41,7 @@ The flow shown in the diagram, in detail, looks like this:
 
 MeetPulse is a Tauri 2 app. The interface is built with Next.js using React and TypeScript, renders inside the system's WebView, and all the heavy lifting lives in a RUST core. There is no separate backend service.
 
-<figure>
-  <Image src={meetPulseArchitecture} alt="MeetPulse architecture diagram, explaining how each component of MeetPulse interacts" width={1200} loading="lazy" />
-  <figcaption>Figure 3 — MeetPulse's architecture: understanding how each component of the system interacts</figcaption>
-</figure>
+<Diagram name="meetpulse-desktop/architecture" caption="Figure 3 (interactive) — MeetPulse architecture: interface, Rust core, SQLite, llama-helper and optional cloud gateway." />
 
 The layers in the diagram correspond to the following:
 

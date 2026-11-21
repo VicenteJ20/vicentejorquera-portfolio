@@ -1,0 +1,95 @@
+type: architecture
+title: MeetPulse Desktop — architecture
+description: "Architecture of the MeetPulse desktop app: interface, Rust core, local storage and optional cloud gateway."
+direction: RIGHT
+font: mixed
+nodes:
+  - id: desktop
+    label: MeetPulse · desktop app
+    kind: onprem
+    children:
+      - id: interface
+        label: Interface
+        sublabel: Next.js · React · TS
+        icon: lu-monitor
+        variant: stacked
+        tone: accent
+      - id: rustcore
+        label: Rust core
+        sublabel: Tauri 2
+        kind: group
+        icon: lu-cog
+        variant: stacked
+        children:
+          - id: audio
+            label: Audio
+            sublabel: cpal · WASAPI · VAD
+            icon: lu-mic
+            variant: stacked
+          - id: transcription
+            label: Transcription
+            sublabel: Whisper · Parakeet
+            icon: lu-languages
+            variant: stacked
+          - id: data
+            label: Data
+            sublabel: sqlx · migrations
+            kind: group
+            icon: lu-hard-drive
+            variant: stacked
+            description: Accesses SQLite via sqlx (queries and migrations).
+            children:
+              - id: sqlite
+                label: SQLite
+                sublabel: FTS5 · e5 embeddings
+                icon: lu-database
+                variant: stacked
+                kind: database
+                tone: data
+          - id: summary
+            label: Summary & assistant
+            sublabel: templates · chat · coach
+            kind: group
+            icon: lu-sparkles
+            variant: stacked
+            description: For local inference, invokes llama-helper via stdin/stdout.
+            children:
+              - id: llama
+                label: llama-helper
+                sublabel: child process · llama.cpp
+                icon: lu-terminal
+                variant: stacked
+                kind: compute
+      - id: cloud
+        label: Optional cloud
+        kind: cloud
+        children:
+          - id: vercel
+            label: Vercel AI Gateway
+            sublabel: HTTPS · your API key
+            icon: lu-cloud
+            variant: stacked
+            tone: network
+edges:
+  - { from: interface, to: rustcore, label: invoke · emit, both: true }
+  - { from: audio, to: transcription, label: audio segments }
+  - { from: transcription, to: data, label: transcript }
+  - { from: transcription, to: summary, label: transcript }
+  - { from: summary, to: data, label: context, style: dashed }
+  - { from: transcription, to: vercel, label: audio stream, style: dashed }
+  - { from: summary, to: vercel, label: text stream, style: dashed }
+legend:
+  - { style: solid, label: Always local }
+  - { style: dashed, label: Optional / cloud mode }
+variants:
+  narrow:
+    direction: DOWN
+    nodes:
+      interface: { sublabel: Next.js · React }
+      audio: { sublabel: cpal · VAD }
+      transcription: { sublabel: Whisper · Parakeet }
+      data: { sublabel: sqlx }
+      summary: { sublabel: chat · coach }
+      sqlite: { sublabel: FTS5 · e5 }
+      llama: { sublabel: llama.cpp }
+      vercel: { sublabel: HTTPS }
