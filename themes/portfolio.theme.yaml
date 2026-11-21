@@ -1,0 +1,55 @@
+# Diagram theme that matches the site (src/styles/global.css): warm paper background, olive accent.
+# Used by default for every diagram (dgm.config.json -> "theme"). Light and dark follow the site's .dark class.
+name: portfolio
+description: vicentejorquera.dev — olive on warm paper (light) / olive on charcoal (dark)
+extends: distill
+font: mixed
+fonts:
+  serif: "'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif"
+  sans: "'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"
+light:
+  panel-a: "#f1efe9"        # --surface-2
+  panel-b: "#ffffff"        # --surface
+  panel-stroke: "#e4e1d8"   # --line
+  node-bg: "#ffffff"
+  stroke: "#a09d90"
+  text: "#1c1b18"          # --ink
+  muted: "#64625c"         # --muted
+  edge: "#5b594f"
+  accent: "#556b2f"        # --accent
+  flow: "#c98a1b"
+  label-bg: "#faf9f6"      # --bg
+  icon-ink: "#46541f"      # --accent-strong
+  tones:
+    compute: "#dfe4c4"
+    data: "#cfdccb"
+    network: "#ebdfb9"
+    neutral: "#e7e5da"
+    accent: "#d3dca3"
+    ok: "#d4e5d0"
+    warn: "#f2e2b6"
+    danger: "#f2cfc8"
+    info: "#d3deea"
+dark:
+  panel-a: "#201f21"        # --surface-2
+  panel-b: "#1a1b1d"        # --surface
+  panel-stroke: "#39393e"   # --line-strong
+  node-bg: "#27262a"
+  stroke: "#6c6c72"
+  text: "#e8e7e0"          # --ink
+  muted: "#a2a096"         # --muted
+  edge: "#a2a096"
+  accent: "#b3c16b"        # --accent
+  flow: "#e3b457"
+  label-bg: "#131416"      # --bg
+  icon-ink: "#ccd78e"      # --accent-strong
+  tones:
+    compute: "#4d5a1f"
+    data: "#3f5a45"
+    network: "#6a5a2a"
+    neutral: "#4a4a3a"
+    accent: "#667a22"
+    ok: "#3f6b4d"
+    warn: "#8a6a2c"
+    danger: "#8a4a40"
+    info: "#3f5370"

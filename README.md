@@ -100,6 +100,22 @@ Your markdown here. Everything you'd expect works:
 - If both exist **with the same slug**, each page hreflangs the other. English gets an ES fallback link to `/es/blog/` when there's no translation
 - RSS feeds: `/rss.xml` (EN) and `/es/rss.xml` (ES)
 
+## Interactive diagrams
+
+Diagrams are made with the `diagram-specialist` agent (diagrams-maker tools) and shown with `src/components/Diagram.astro`:
+hover/click highlighting, animated flow, steps, light/dark following the site. The site only reads pre-rendered files, so nothing extra
+is installed at build time.
+
+```mdx
+import Diagram from '../../../components/Diagram.astro';
+
+<Diagram name="meetpulse-architecture" caption="Figure 1. …" />   {/* src/diagrams/<name>.<lang>.svg */}
+```
+
+Files: `src/diagrams/<name>.<lang>.diagram.yaml` (source), `src/diagrams/<name>.<lang>.svg` (interactive export),
+`public/diagrams/<name>.<lang>.png` (static). Default theme: `themes/portfolio.theme.yaml` (see `dgm.config.json`).
+The full conventions — and how the agent asks where to place a diagram — are in [`AGENTS.md`](AGENTS.md).
+
 ## Adding a product
 
 Create `src/content/products/<lang>/<slug>.mdx`:

@@ -7,8 +7,8 @@ draft: false
 ---
 
 import { Image } from 'astro:assets';
+import Diagram from '../../../components/Diagram.astro';
 import capasEn from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-capas-en.webp';
-import meetPulseFlow from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-flow-en.webp';
 import meetPulseArchitecture from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-architecture-en.webp';
 
 MeetPulse is a desktop application designed so that users can record meetings in real time by capturing their computer's audio along with their microphone. This makes it agnostic to the meeting tool you're working with — it doesn't matter whether it's Microsoft Teams, Zoom, Google Meet, or anything else. MeetPulse captures it all without issue.
@@ -32,10 +32,7 @@ Today, nearly every new product, whether built with AI or not, is born as a SaaS
 
 As noted in the points above, **MeetPulse** uses a hybrid strategy to do its work, letting users choose whether they want everything 100% local, everything 100% in the cloud, or — for each piece — what stays on their machine and what goes to the cloud. The decision is entirely in the user's hands.
 
-<figure>
-  <Image src={meetPulseFlow} alt="MeetPulse flow diagram explaining the end-to-end process, from listening to final analysis" width={1200} loading="lazy" />
-  <figcaption>Figure 2 — MeetPulse's flow: you choose what goes out to the internet and what stays under your control</figcaption>
-</figure>
+<Diagram name="meetpulse-flow" caption="Figure 2 (interactive) — MeetPulse flow: capture, transcription (local or cloud), storage, embeddings and Insights & Meety. Use the step buttons to switch between 100% local, 100% cloud and hybrid." />
 
 The flow shown in the diagram, in detail, looks like this:
 
