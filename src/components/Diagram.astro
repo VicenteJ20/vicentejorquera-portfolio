@@ -1,0 +1,243 @@
+---
+/**
+ * <Diagram name="meetpulse-flow" caption="…" />
+ *
+ * Shows an INTERACTIVE diagram exported by the `dgm` tools (diagrams-maker): hover/click highlighting, animated flow,
+ * steps, tooltips. It inlines a pre-rendered SVG — no runtime dependency, no React, nothing to install on the build machine.
+ *
+ * Files (see AGENTS.md → "Diagrams"):
+ *   src/diagrams/<name>.<lang>.diagram.yaml   source (edit this, then re-export)
+ *   src/diagrams/<name>.<lang>.svg            interactive export  ← this component reads it
+ *   public/diagrams/<name>.<lang>.png         static export (social cards, RSS, fallbacks)
+ *
+ * Language: `<name>.<lang>.svg` is used when it exists (lang = current page locale, or the `lang` prop), else `<name>.svg`.
+ *
+ * In MDX:   import Diagram from '../../../components/Diagram.astro';
+ *           <Diagram name="meetpulse-flow" caption="Figure 1. …" />
+ *
+ * Props: name · caption · lang · minWidth (px under which it scrolls sideways, default 640) · maxWidth (CSS, e.g. "720px")
+ */
+interface Props {
+    name: string;
+    caption?: string;
+    lang?: "en" | "es";
+    minWidth?: number;
+    maxWidth?: string;
+}
+
+const { name, caption, minWidth = 640, maxWidth } = Astro.props;
+const lang = (Astro.props.lang ?? Astro.currentLocale ?? "en") as "en" | "es";
+
+// Build-time lookup of every exported SVG (raw text).
+const files = import.meta.glob<string>("/src/diagrams/**/*.svg", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+});
+const svg = files[`/src/diagrams/${name}.${lang}.svg`] ?? files[`/src/diagrams/${name}.svg`];
+
+if (!svg) {
+    const available = Object.keys(files)
+        .map((p) => p.replace("/src/diagrams/", "").replace(/\.svg$/, ""))
+        .sort();
+    throw new Error(
+        `<Diagram name="${name}">: no SVG found. Looked for src/diagrams/${name}.${lang}.svg and src/diagrams/${name}.svg. ` +
+            `Available: ${available.length ? available.join(", ") : "(none yet — ask the diagram agent to export one)"}`,
+    );
+}
+
+const expandLabel = lang === "es" ? "Ver en pantalla completa" : "View full screen";
+const closeLabel = lang === "es" ? "Cerrar" : "Close";
+---
+
+<figure class="dgm-fig" data-dgm-lang={lang} style={`--dgm-min:${minWidth}px;${maxWidth ? `max-width:${maxWidth};` : ""}`}>
+    <div class="dgm-scroll">
+        <Fragment set:html={svg} />
+        <button type="button" class="dgm-expand" aria-label={expandLabel} title={expandLabel} data-close={closeLabel}>⤢</button>
+    </div>
+    {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style is:global>
+    .dgm-fig {
+        margin: 2em auto;
+        position: relative;
+        /* the diagram uses the site's typefaces (the SVG falls back to its baked stacks) */
+        --dgm-serif: var(--font-display);
+        --dgm-sans: var(--font-sans);
+    }
+    .dgm-fig .dgm-scroll {
+        position: relative;
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        background: var(--surface);
+        padding: 0.5rem;
+    }
+    .dgm-fig svg.dgm {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-width: var(--dgm-min, 640px);
+        margin: 0 auto;
+    }
+    .post-body .dgm-fig figcaption {
+        margin-top: 0.9em;
+        margin-bottom: 0;
+    }
+    .dgm-fig .dgm-expand {
+        display: none;
+        position: sticky;
+        float: right;
+        top: 0;
+        right: 0;
+        margin: 0 0 -2rem auto;
+        z-index: 2;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--ink-soft);
+        font-size: 0.95rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .dgm-fig[data-small] .dgm-expand {
+        display: block;
+    }
+    .dgm-fig .dgm-expand:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    /* full-screen viewer (a single <dialog> shared by every diagram) */
+    dialog.dgm-dialog {
+        width: min(96vw, 1500px);
+        max-height: 92vh;
+        padding: 0;
+        border: 1px solid var(--line-strong);
+        border-radius: 0.9rem;
+        background: var(--surface);
+        color: var(--ink);
+    }
+    dialog.dgm-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.55);
+    }
+    dialog.dgm-dialog .dgm-bar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.4rem;
+        padding: 0.5rem;
+        background: var(--surface);
+    }
+    dialog.dgm-dialog .dgm-bar button {
+        min-width: 2.1rem;
+        height: 2rem;
+        padding: 0 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--line-strong);
+        background: transparent;
+        color: inherit;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+    dialog.dgm-dialog .dgm-body {
+        overflow: auto;
+        max-height: calc(92vh - 3.2rem);
+        padding: 0 0.75rem 0.75rem;
+    }
+    dialog.dgm-dialog svg.dgm {
+        display: block;
+        max-width: none;
+        min-width: 0;
+        height: auto;
+    }
+</style>
+
+<script>
+    // 1) keep every diagram in sync with the site's light/dark switch (<html class="dark">)
+    const root = document.documentElement;
+    const syncMode = () => {
+        const mode = root.classList.contains("dark") ? "dark" : "light";
+        document.querySelectorAll<SVGSVGElement>("svg.dgm").forEach((s) => s.setAttribute("data-mode", mode));
+    };
+    syncMode();
+    new MutationObserver(syncMode).observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    // 2) show the "full screen" button only when the diagram is drawn noticeably smaller than its natural size
+    const figures = Array.from(document.querySelectorAll<HTMLElement>(".dgm-fig"));
+    const measure = (fig: HTMLElement) => {
+        const svg = fig.querySelector<SVGSVGElement>("svg.dgm");
+        if (!svg) return;
+        const natural = svg.viewBox.baseVal.width || 0;
+        const shown = svg.getBoundingClientRect().width;
+        if (natural && shown / natural < 0.8) fig.setAttribute("data-small", "");
+        else fig.removeAttribute("data-small");
+    };
+    if ("ResizeObserver" in window) {
+        const ro = new ResizeObserver((entries) => entries.forEach((e) => measure(e.target as HTMLElement)));
+        figures.forEach((f) => ro.observe(f));
+    }
+    figures.forEach(measure);
+
+    // 3) full-screen viewer: the live <svg> is MOVED into the dialog (so hover/steps keep working) and moved back on close
+    let dialog: HTMLDialogElement | null = null;
+    let zoomLabel: HTMLButtonElement;
+    let home: { svg: SVGSVGElement; parent: HTMLElement; next: ChildNode | null } | null = null;
+    let zoom = 1;
+    const applyZoom = () => {
+        const svg = dialog?.querySelector<SVGSVGElement>("svg.dgm");
+        if (!svg) return;
+        const natural = svg.viewBox.baseVal.width;
+        svg.style.width = `${natural * zoom}px`;
+        zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+    };
+    const ensureDialog = (closeText: string) => {
+        if (dialog) return dialog;
+        dialog = document.createElement("dialog");
+        dialog.className = "dgm-dialog";
+        dialog.innerHTML =
+            `<div class="dgm-bar"><button type="button" data-z="-">−</button><button type="button" data-z="0"></button>` +
+            `<button type="button" data-z="+">+</button><button type="button" data-z="x" aria-label="${closeText}">✕</button></div>` +
+            `<div class="dgm-body"></div>`;
+        zoomLabel = dialog.querySelector('[data-z="0"]') as HTMLButtonElement;
+        dialog.addEventListener("click", (e) => {
+            const t = e.target as HTMLElement;
+            if (t === dialog) dialog!.close();
+            const z = t.closest<HTMLElement>("[data-z]")?.dataset.z;
+            if (z === "x") dialog!.close();
+            else if (z === "-") zoom = Math.max(0.4, zoom - 0.25);
+            else if (z === "+") zoom = Math.min(4, zoom + 0.25);
+            else if (z === "0") zoom = 1;
+            if (z && z !== "x") applyZoom();
+        });
+        dialog.addEventListener("close", () => {
+            if (!home) return;
+            const svg = dialog!.querySelector<SVGSVGElement>("svg.dgm");
+            if (svg) {
+                svg.style.width = "";
+                home.parent.insertBefore(svg, home.next);
+            }
+            home = null;
+        });
+        document.body.appendChild(dialog);
+        return dialog;
+    };
+    document.addEventListener("click", (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".dgm-expand");
+        if (!btn) return;
+        const svg = btn.parentElement?.querySelector<SVGSVGElement>("svg.dgm");
+        if (!svg || !svg.parentElement) return;
+        const d = ensureDialog(btn.dataset.close ?? "Close");
+        home = { svg, parent: svg.parentElement, next: svg.nextSibling };
+        d.querySelector(".dgm-body")!.appendChild(svg);
+        zoom = 1;
+        d.showModal();
+        applyZoom();
+    });
+</script>

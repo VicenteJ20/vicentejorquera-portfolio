@@ -1,0 +1,5 @@
+{
+  "$comment": "Config for the dgm diagram tools (diagrams-maker). Diagrams use the `portfolio` theme unless a spec/render call names another.",
+  "themes": ["themes/*.theme.yaml"],
+  "theme": "portfolio"
+}

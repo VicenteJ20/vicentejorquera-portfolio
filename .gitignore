@@ -14,3 +14,7 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# diagram tooling: official Azure/AWS icon packs stay on the author machine, never in the repo
+.dgm/
+icons-inbox/
