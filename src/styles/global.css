@@ -57,6 +57,8 @@
 
 /* ---- Expose tokens to Tailwind utilities ---- */
 @theme inline {
+  /* header: inline nav from 850px (iPad portrait stays on the hamburger); use as `nav:` */
+  --breakpoint-nav: 850px;
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);

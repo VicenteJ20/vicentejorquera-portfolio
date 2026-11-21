@@ -43,16 +43,16 @@ const navItems = [
 
     {/* Nav + controls */}
     <div class="flex shrink-0 items-center gap-2 sm:gap-4">
-      <nav class="hidden items-center gap-3 sm:flex sm:gap-5" aria-label="Main">
+      <nav class="hidden items-center gap-3 nav:flex nav:gap-5" aria-label="Main">
         {navItems.map((item) => (
           <a href={item.href} class="nav-link" aria-current={item.active ? 'true' : undefined}>{item.label}</a>
         ))}
       </nav>
 
-      <span class="hidden h-4 w-px bg-line-strong sm:block" aria-hidden="true"></span>
+      <span class="hidden h-4 w-px bg-line-strong nav:block" aria-hidden="true"></span>
 
       {/* RSS */}
-      <a href={rss} class="hidden h-9 w-9 items-center justify-center rounded-full border border-transparent text-muted transition-colors hover:border-line-strong hover:text-accent sm:flex" aria-label="RSS feed">
+      <a href={rss} class="hidden h-9 w-9 items-center justify-center rounded-full border border-transparent text-muted transition-colors hover:border-line-strong hover:text-accent nav:flex" aria-label="RSS feed">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
           <path d="M4 11a9 9 0 0 1 9 9" /><path d="M4 4a16 16 0 0 1 16 16" /><circle cx="5" cy="19" r="1.2" fill="currentColor" stroke="none" />
         </svg>
@@ -76,8 +76,8 @@ const navItems = [
         </svg>
       </button>
 
-      {/* Menu toggle — below sm only */}
-      <button type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-nav" class="flex h-9 w-9 items-center justify-center rounded-full border border-line-strong text-ink transition-colors hover:border-accent hover:text-accent sm:hidden" aria-label="Toggle menu">
+      {/* Menu toggle — below the nav breakpoint (850px) */}
+      <button type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-nav" class="flex h-9 w-9 items-center justify-center rounded-full border border-line-strong text-ink transition-colors hover:border-accent hover:text-accent nav:hidden" aria-label="Toggle menu">
         <svg class="icon-menu h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
           <path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h16" />
         </svg>
@@ -88,8 +88,8 @@ const navItems = [
     </div>
   </div>
 
-  {/* Collapsible nav — below sm only */}
-  <div id="mobile-nav" class="mobile-nav border-t border-line sm:hidden" hidden>
+  {/* Collapsible nav — below the nav breakpoint (850px) */}
+  <div id="mobile-nav" class="mobile-nav border-t border-line nav:hidden" hidden>
     <nav class="shell flex flex-col py-3" aria-label="Mobile">
       {navItems.map((item) => (
         <a href={item.href} aria-current={item.active ? 'true' : undefined} class="mobile-nav-link">{item.label}</a>
