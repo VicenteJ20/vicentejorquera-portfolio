@@ -1,95 +1,103 @@
 type: architecture
 title: MeetPulse Desktop — arquitectura
-description: "Arquitectura de la app de escritorio MeetPulse: interfaz, nucleo Rust, almacenamiento local y gateway cloud opcional."
+description: "Cómo está construido MeetPulse Desktop: una app Tauri 2 con interfaz Next.js, núcleo Rust, SQLite y llama.cpp locales, y un gateway cloud opcional."
 direction: RIGHT
 font: mixed
 nodes:
   - id: desktop
-    label: MeetPulse · desktop app
+    label: Tu equipo · MeetPulse Desktop
     kind: onprem
     children:
-      - id: interface
-        label: Interface
-        sublabel: Next.js · React · TS
-        icon: lu-monitor
-        variant: stacked
-        tone: accent
-      - id: rustcore
-        label: Rust core
-        sublabel: Tauri 2
+      - id: webview
+        label: WebView de Tauri
         kind: group
-        icon: lu-cog
-        variant: stacked
+        children:
+          - id: interface
+            label: Interfaz
+            sublabel: Next.js · React · TypeScript
+            icon: lu-monitor
+            variant: stacked
+            tone: accent
+            badge: 1
+            description: Corre dentro del WebView de Tauri. Nunca toca el audio ni los modelos; solo habla con el núcleo.
+      - id: rustcore
+        label: Núcleo Rust · Tauri 2
+        kind: group
         children:
           - id: audio
-            label: Audio
-            sublabel: cpal · WASAPI · VAD
+            label: Captura de audio
+            sublabel: micrófono + sistema · cpal · VAD
             icon: lu-mic
             variant: stacked
+            badge: 2
+            description: Mezcla el micrófono y el audio del sistema y deja pasar solo el habla.
           - id: transcription
-            label: Transcription
+            label: Transcripción
             sublabel: Whisper · Parakeet
             icon: lu-languages
             variant: stacked
+            badge: 3
           - id: data
-            label: Data
+            label: Capa de datos
             sublabel: sqlx · migrations
-            kind: group
             icon: lu-hard-drive
             variant: stacked
-            description: Accede a SQLite con sqlx (consultas y migraciones).
-            children:
-              - id: sqlite
-                label: SQLite
-                sublabel: FTS5 · e5 embeddings
-                icon: lu-database
-                variant: stacked
-                kind: database
-                tone: data
+            stackWith: summary
+            badge: 5
           - id: summary
-            label: Summary & assistant
-            sublabel: templates · chat · coach
-            kind: group
+            label: Resumen y asistente
+            sublabel: plantillas · chat · coach
             icon: lu-sparkles
             variant: stacked
-            description: Para inferencia local invoca llama-helper por stdin/stdout.
-            children:
-              - id: llama
-                label: llama-helper
-                sublabel: child process · llama.cpp
-                icon: lu-terminal
-                variant: stacked
-                kind: compute
-      - id: cloud
-        label: Optional cloud
-        kind: cloud
+            badge: 4
+      - id: local
+        label: Recursos locales
+        kind: group
         children:
-          - id: vercel
-            label: Vercel AI Gateway
-            sublabel: HTTPS · your API key
-            icon: lu-cloud
+          - id: llama
+            label: llama-helper
+            sublabel: llama.cpp · Gemma · Qwen
+            icon: lu-cpu
             variant: stacked
-            tone: network
+            tone: compute
+            description: Proceso hijo que ejecuta los modelos locales, controlado por stdin/stdout.
+          - id: sqlite
+            label: SQLite
+            sublabel: reuniones · FTS5 · vectores e5
+            icon: lu-database
+            variant: stacked
+            tone: data
+            stackWith: llama
+            description: Reuniones, transcripciones, chats e índices vectoriales, en un archivo de tu equipo.
+  - id: cloud
+    label: Nube opcional
+    kind: cloud
+    children:
+      - id: vercel
+        label: Vercel AI Gateway
+        sublabel: HTTPS · tu clave API
+        icon: lu-cloud
+        variant: stacked
+        tone: network
 edges:
-  - { from: interface, to: rustcore, label: invoke · emit, both: true }
-  - { from: audio, to: transcription, label: audio segments }
-  - { from: transcription, to: data, label: transcript }
-  - { from: transcription, to: summary, label: transcript }
-  - { from: summary, to: data, label: context, style: dashed }
-  - { from: transcription, to: vercel, label: audio stream, style: dashed }
-  - { from: summary, to: vercel, label: text stream, style: dashed }
+  - { from: interface, to: audio, label: invoke · emit, both: true, flow: true }
+  - { from: audio, to: transcription, label: segmentos de audio, flow: true }
+  - { from: transcription, to: summary, label: transcripción, flow: true }
+  - { from: transcription, to: data, label: transcripción }
+  - { from: data, to: sqlite, label: sqlx }
+  - { from: summary, to: llama, label: stdin · stdout }
+  - { from: rustcore, to: vercel, label: audio · texto, style: dashed }
 legend:
   - { style: solid, label: Siempre local }
-  - { style: dashed, label: Opcional / modo cloud }
+  - { style: dashed, label: Opcional / modo nube }
 variants:
-  narrow:                      # phone: containers of the Rust core collapse into single boxes, Data beside Summary (no edge loops)
-    direction: DOWN
-    notesPosition: below
-    hide: [sqlite, llama]
+  narrow:                      # phone: vertical, Summary beside Data, llama-helper beside SQLite
     nodes:
       interface: { sublabel: Next.js · React }
       audio: { sublabel: cpal · VAD }
       transcription: { sublabel: Whisper · Parakeet }
-      data: { label: Data, sublabel: SQLite · FTS5, stackWith: summary }
-      summary: { label: Summary, sublabel: llama.cpp }
+      data: { sublabel: sqlx }
+      summary: { label: Resumen, sublabel: chat · coach }
+      llama: { sublabel: llama.cpp }
+      sqlite: { sublabel: FTS5 · e5 }
       vercel: { sublabel: HTTPS }
