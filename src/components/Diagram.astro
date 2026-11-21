@@ -575,7 +575,7 @@ const t =
         max-width: none;
         min-width: 0;
         height: auto;
-        margin: 0 auto;
+        margin: 0 auto; /* centred sideways; vertical centring is set from the script (only when it fits, so nothing is clipped) */
     }
     dialog.dgm-dialog .dgm-expand {
         display: none;
@@ -806,11 +806,27 @@ const t =
     let home: { stage: HTMLElement; fig: Fig; next: ChildNode | null } | null = null;
     let zoom = 1;
     let fitZoom = 1;
+    let fitMode = true; // while true the diagram follows the viewer's size (also on window resize)
+    const MAX_FIT = 1.6; // small diagrams may grow a little to use the space; never blown up beyond this
     const phone = () => window.matchMedia("(max-width: 640px)").matches;
     const natural = (svg: SVGSVGElement) => svg.viewBox.baseVal.width;
     const visibleSvg = () => Array.from(dialog?.querySelectorAll<SVGSVGElement>("svg.dgm") ?? []).find((s) => s.getClientRects().length);
+    // "fit" = the whole diagram inside the visible area (width AND height), centred
+    const computeFit = () => {
+        const svg = visibleSvg();
+        const sc = svg?.closest<HTMLElement>(".dgm-scroll");
+        if (!svg || !sc) return;
+        const w = Math.max(1, sc.clientWidth - 16);
+        const h = Math.max(1, sc.clientHeight - 16);
+        fitZoom = Math.min(MAX_FIT, w / natural(svg), h / svg.viewBox.baseVal.height);
+    };
     const applyZoom = () => {
-        dialog?.querySelectorAll<SVGSVGElement>("svg.dgm").forEach((svg) => (svg.style.width = `${natural(svg) * zoom}px`));
+        dialog?.querySelectorAll<SVGSVGElement>("svg.dgm").forEach((svg) => {
+            svg.style.width = `${natural(svg) * zoom}px`;
+            const sc = svg.closest<HTMLElement>(".dgm-scroll");
+            const free = sc ? sc.clientHeight - 16 - svg.viewBox.baseVal.height * zoom : 0;
+            svg.style.marginTop = free > 0 ? `${Math.round(free / 2)}px` : "";
+        });
         zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
     };
     const ensureDialog = (btn: HTMLElement) => {
@@ -838,16 +854,27 @@ const t =
             const z = target.closest<HTMLElement>(".dgm-top [data-z]")?.dataset.z;
             if (!z) return;
             if (z === "x") return dialog!.close();
-            if (z === "-") zoom = Math.max(0.3, zoom - 0.15);
-            else if (z === "+") zoom = Math.min(3, zoom + 0.15);
-            else zoom = Math.abs(zoom - fitZoom) < 0.02 ? 1 : fitZoom; // % button: fit ⇄ actual size
+            if (z === "-") {
+                zoom = Math.max(0.3, zoom - 0.15);
+                fitMode = false;
+            } else if (z === "+") {
+                zoom = Math.min(3, zoom + 0.15);
+                fitMode = false;
+            } else {
+                // % button: fit ⇄ actual size
+                fitMode = !fitMode;
+                zoom = fitMode ? fitZoom : 1;
+            }
             applyZoom();
             home?.fig._dgmCenter?.();
         });
         dialog.addEventListener("close", () => {
             if (!home) return;
             const stage = dialog!.querySelector<HTMLElement>(".dgm-stage");
-            stage?.querySelectorAll<SVGSVGElement>("svg.dgm").forEach((s) => (s.style.width = ""));
+            stage?.querySelectorAll<SVGSVGElement>("svg.dgm").forEach((s) => {
+                s.style.width = "";
+                s.style.marginTop = "";
+            });
             if (stage) home.fig.insertBefore(stage, home.next);
             home.fig._dgmRefresh?.();
             home.fig._dgmCenter?.();
@@ -856,6 +883,12 @@ const t =
         document.body.appendChild(dialog);
         return dialog;
     };
+    window.addEventListener("resize", () => {
+        if (!dialog?.open || !fitMode) return;
+        computeFit();
+        zoom = fitZoom;
+        applyZoom();
+    });
     document.addEventListener("click", (e) => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".dgm-expand");
         if (!btn) return;
@@ -866,13 +899,10 @@ const t =
         home = { stage, fig, next: stage.nextSibling };
         d.querySelector(".dgm-body")!.appendChild(stage);
         d.showModal();
-        const svg = visibleSvg();
-        if (svg) {
-            const sc = svg.closest<HTMLElement>(".dgm-scroll")!;
-            fitZoom = Math.min(1, (sc.clientWidth - 16) / natural(svg));
-            // on a phone "fit" is unreadable (the diagram is designed to be read at ~100%): start at actual size and pan
-            zoom = phone() ? 1 : fitZoom;
-        }
+        computeFit();
+        // on a phone "fit" is unreadable (the diagram is designed to be read at ~100%): start at actual size and pan
+        fitMode = !phone();
+        zoom = fitMode ? fitZoom : 1;
         applyZoom();
         fig._dgmRefresh?.();
         requestAnimationFrame(() => fig._dgmCenter?.());
