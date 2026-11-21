@@ -23,16 +23,11 @@ Today, nearly every new product, whether built with AI or not, is born as a SaaS
 
 > Vercel AI Gateway offers ZDR (Zero Data Retention) and No Training indicators (providers that state they do not use your data for training). These are available on Vercel's PRO plans, and it's the user's responsibility to pay for the corresponding subscription to take advantage of these features when the business requires it.
 
-<figure>
-  <Image src={capasEn} alt="Layered diagram of MeetPulse Desktop: your machine, local data, local AI, capture, and optional cloud (Vercel AI Gateway)" width={1200} loading="lazy" />
-  <figcaption>Figure 1 — MeetPulse's layers: only the optional cloud layer sends data off your machine; the other four live on your computer.</figcaption>
-</figure>
-
 ## The flow of the solution
 
 As noted in the points above, **MeetPulse** uses a hybrid strategy to do its work, letting users choose whether they want everything 100% local, everything 100% in the cloud, or — for each piece — what stays on their machine and what goes to the cloud. The decision is entirely in the user's hands.
 
-<Diagram name="meetpulse-flow" caption="Figure 2 (interactive) — MeetPulse flow: capture, transcription (local or cloud), storage, embeddings and Insights & Meety. Use the step buttons to switch between 100% local, 100% cloud and hybrid." />
+<Diagram name="meetpulse-desktop/solution-flow" stagger={1.5} caption="Figure 2 (interactive) — MeetPulse flow: capture, transcription (local or cloud), storage, embeddings and Insights & Meety. Use the step buttons to switch between 100% local, 100% cloud and hybrid." />
 
 The flow shown in the diagram, in detail, looks like this:
 

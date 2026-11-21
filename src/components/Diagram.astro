@@ -5,16 +5,17 @@
  * Shows an INTERACTIVE diagram exported by the `dgm` tools (diagrams-maker): hover/click highlighting, animated flow,
  * steps, tooltips. It inlines a pre-rendered SVG — no runtime dependency, no React, nothing to install on the build machine.
  *
- * Files (see AGENTS.md → "Diagrams"):
- *   src/diagrams/<name>.<lang>.diagram.yaml   source (edit this, then re-export)
- *   src/diagrams/<name>.<lang>.svg            interactive export  ← this component reads it
- *   src/diagrams/<name>.<lang>.narrow.svg     OPTIONAL phone version (vertical layout) — shown automatically under 640 px
- *   public/diagrams/<name>.<lang>.png         static export (social cards, RSS, fallbacks)
+ * Files (see AGENTS.md → "Diagrams"):  src/diagrams/<project>/<lang>/{editables,assets}/
+ *   editables/<diagram>.diagram.yaml   source (edit this, then re-export)
+ *   assets/<diagram>.svg               interactive export  ← this component reads it
+ *   assets/<diagram>.narrow.svg        OPTIONAL phone version (vertical layout) — shown automatically under 640 px
+ *   assets/<diagram>.png | .static.svg only when the author asked for them (not used by this component)
  *
- * Language: `<name>.<lang>.svg` is used when it exists (lang = current page locale, or the `lang` prop), else `<name>.svg`.
+ * `name` = "<project>/<diagram>". Language = the page locale (or the `lang` prop); falls back to the `en` folder.
  *
  * In MDX:   import Diagram from '../../../components/Diagram.astro';
- *           <Diagram name="meetpulse-flow" caption="Figure 1. …" />
+ *           <Diagram name="meetpulse-desktop/solution-flow" caption="Figure 1. …" />
+ *           <Diagram name="meetpulse-desktop/solution-flow" stagger={1.5} />   ← light the flow up box by box (1.5 s each)
  *
  * Layout of the UI
  *   · the diagram sits in a card; ONE small round button (top-right corner of the card) opens the full-screen viewer
@@ -22,11 +23,16 @@
  *     and the scenario text. On phones that row is pinned to the top while the (tall) diagram scrolls underneath.
  *   · the viewer has its own header: zoom group (− 100% +) and close; the scenario row stays at the bottom.
  *
+ * Staggered flow (`stagger`, seconds, default 0 = off): picking a scenario lights its boxes up one after another along the arrows
+ * (the order is declared in the diagram: automatic from the arrows, or `steps[].sequence`) and the view follows the flow.
+ * A scenario then lasts (groups × stagger + hold) seconds in autoplay.
+ *
  * Autoplay: once the figure is on screen it cycles through the steps. It pauses on mouse hover/focus, when the tab/figure is
  * hidden, after the reader picks a step, and never starts with `prefers-reduced-motion`.
  *
  * Props: name · caption · lang · minWidth (px under which the WIDE svg scrolls sideways; default ≈ 80% of its natural width)
- *        · maxWidth (CSS, e.g. "720px") · autoplay (default true) · interval (seconds per step, default 5)
+ *        · maxWidth (CSS, e.g. "720px") · autoplay (default true) · interval (seconds per step when stagger is 0, default 5)
+ *        · stagger (seconds between boxes, default 0) · hold (seconds a finished scenario stays before the next, default 1.5)
  */
 interface Props {
     name: string;
@@ -36,9 +42,11 @@ interface Props {
     maxWidth?: string;
     autoplay?: boolean;
     interval?: number;
+    stagger?: number;
+    hold?: number;
 }
 
-const { name, caption, maxWidth, autoplay = true, interval = 5 } = Astro.props;
+const { name, caption, maxWidth, autoplay = true, interval = 5, stagger = 0, hold = 1.5 } = Astro.props;
 const lang = (Astro.props.lang ?? Astro.currentLocale ?? "en") as "en" | "es";
 
 // Build-time lookup of every exported SVG (raw text).
@@ -57,10 +65,18 @@ const clean = (raw?: string) =>
         .replace(/(<g [^>]*?) role="button"( aria-label="[^"]*")?/g, "$1")
         .replace(/(<svg [^>]*class="dgm"[^>]*?) role="group"/, '$1 role="img"');
 
-const svg = clean(files[`/src/diagrams/${name}.${lang}.svg`] ?? files[`/src/diagrams/${name}.svg`]);
+// `<project>/<diagram>` → src/diagrams/<project>/<lang>/assets/<diagram>.svg (falls back to the `en` folder)
+const slash = name.lastIndexOf("/");
+const project = slash > 0 ? name.slice(0, slash) : "";
+const diagram = slash > 0 ? name.slice(slash + 1) : name;
+const find = (suffix: string) =>
+    files[`/src/diagrams/${project}/${lang}/assets/${diagram}${suffix}.svg`] ??
+    files[`/src/diagrams/${project}/en/assets/${diagram}${suffix}.svg`];
+
+const svg = clean(find(""));
 
 // Phone version (vertical layout). Both SVGs live in the page at once, so the narrow one gets its own element ids.
-const narrowRaw = clean(files[`/src/diagrams/${name}.${lang}.narrow.svg`] ?? files[`/src/diagrams/${name}.narrow.svg`]);
+const narrowRaw = clean(find(".narrow"));
 const narrow = narrowRaw
     ?.replace(/(\s)id="([^"]*)"/g, '$1id="m-$2"')
     .replace(/url\(#/g, "url(#m-")
@@ -68,11 +84,12 @@ const narrow = narrowRaw
 
 if (!svg) {
     const available = Object.keys(files)
-        .filter((p) => !p.endsWith(".narrow.svg"))
-        .map((p) => p.replace("/src/diagrams/", "").replace(/\.svg$/, ""))
+        .filter((p) => /\/assets\/[^/]+\.svg$/.test(p) && !/\.(narrow|static)\.svg$/.test(p))
+        .map((p) => p.replace("/src/diagrams/", "").replace(/\/(en|es)\/assets\//, "/").replace(/\.svg$/, ""))
+        .filter((p, i, a) => a.indexOf(p) === i)
         .sort();
     throw new Error(
-        `<Diagram name="${name}">: no SVG found. Looked for src/diagrams/${name}.${lang}.svg and src/diagrams/${name}.svg. ` +
+        `<Diagram name="${name}">: no SVG found. Expected src/diagrams/<project>/${lang}/assets/<diagram>.svg (name="<project>/<diagram>"). ` +
             `Available: ${available.length ? available.join(", ") : "(none yet — ask the diagram agent to export one)"}`,
     );
 }
@@ -101,10 +118,12 @@ const t =
     data-dgm-lang={lang}
     data-autoplay={autoplay && steps.length > 1 ? "1" : "0"}
     data-interval={Math.max(2, interval) * 1000}
+    data-stagger={stagger > 0 ? stagger * 1000 : undefined}
+    data-hold={Math.max(0, hold) * 1000}
     data-has-steps={steps.length ? "1" : undefined}
     style={`--dgm-min:${minWidth}px;${maxWidth ? `max-width:${maxWidth};` : ""}`}
 >
-    <div class="dgm-stage" data-has-narrow={narrow ? "1" : undefined}>
+    <div class="dgm-stage" data-has-narrow={narrow ? "1" : undefined} data-guided={stagger > 0 ? "1" : undefined}>
         <div class="dgm-frame">
             <div class="dgm-scroll dgm-wide">
                 <Fragment set:html={svg} />
@@ -223,6 +242,11 @@ const t =
         }
         .dgm-scroll {
             padding: 0.25rem;
+        }
+        /* staggered flow: the vertical diagram scrolls inside its card so the view can follow the lit boxes */
+        .dgm-stage[data-guided][data-has-narrow] .dgm-frame .dgm-narrow {
+            max-height: min(68vh, 640px);
+            overflow-y: auto;
         }
     }
 
@@ -528,9 +552,11 @@ const t =
         min-height: 0;
         display: flex;
     }
-    dialog.dgm-dialog .dgm-scroll {
+    dialog.dgm-dialog .dgm-scroll,
+    dialog.dgm-dialog .dgm-stage[data-guided] .dgm-frame .dgm-narrow {
         flex: 1 1 auto;
         min-width: 0;
+        max-height: none;
         overflow: auto;
     }
     dialog.dgm-dialog svg.dgm {
@@ -574,7 +600,7 @@ const t =
     type Fig = HTMLElement & { _dgmRefresh?: () => void; _dgmCenter?: () => void };
 
     // 2) scenario controls (real buttons) + autoplay
-    type Api = { show: (k: number) => void; current: () => number };
+    type Api = { show: (k: number, o?: { stagger?: number; onGroup?: (ids: string[], i: number, n: number) => void }) => void; current: () => number };
     const figures = Array.from(document.querySelectorAll<Fig>(".dgm-fig"));
     figures.forEach((fig) => {
         const stage = fig.querySelector<HTMLElement>(".dgm-stage")!;
@@ -598,6 +624,7 @@ const t =
         let current = -1;
 
         // slide the visible scroller so the highlighted part is centred (sideways on the wide diagram, vertically in the viewer)
+        let focusIds: string[] | null = null; // staggered flow: the group being lit right now
         const center = () => {
             const sc = Array.from(stage.querySelectorAll<HTMLElement>(".dgm-scroll")).find((e) => e.getClientRects().length);
             const vis = sc?.querySelector<SVGSVGElement>("svg.dgm");
@@ -609,7 +636,10 @@ const t =
                 left = 0;
                 top = 0;
             } else {
-                const hl = Array.from(vis.querySelectorAll(".el.hl:not(.edge)")).map((e) => e.getBoundingClientRect());
+                const target = focusIds
+                    ? Array.from(vis.querySelectorAll<SVGGElement>(".el:not(.edge)")).filter((e) => focusIds!.includes(e.dataset.id!))
+                    : Array.from(vis.querySelectorAll(".el.hl:not(.edge)"));
+                const hl = target.map((e) => e.getBoundingClientRect());
                 if (hl.length) {
                     if (sc.scrollWidth > sc.clientWidth + 4) {
                         const mid = (Math.min(...hl.map((r) => r.left)) + Math.max(...hl.map((r) => r.right))) / 2;
@@ -625,11 +655,29 @@ const t =
         };
         fig._dgmCenter = center;
 
+        const staggerMs = reduced ? 0 : Number(fig.dataset.stagger) || 0;
+        const holdMs = Number(fig.dataset.hold) || 0;
+        // how long step k stays on screen in autoplay: its flow (groups × stagger) + hold; without stagger the plain interval
+        const duration = (k: number) => {
+            const seq = (svgs.find((s) => s.getClientRects().length) ?? svgs[0]) as unknown as { dgm?: { steps: () => { seq?: string[][] }[] } };
+            const n = seq.dgm?.steps()[k]?.seq?.length ?? 0;
+            return staggerMs > 0 && n > 1 ? n * staggerMs + holdMs : interval;
+        };
+
         const go = (k: number) => {
             current = k;
+            focusIds = null;
             svgs.forEach((svg) => {
                 const api = (svg as unknown as { dgm?: Api }).dgm;
-                if (api) api.show(k);
+                if (api)
+                    api.show(k, {
+                        stagger: staggerMs / 1000,
+                        onGroup: (ids: string[]) => {
+                            if (!svg.getClientRects().length) return;
+                            focusIds = ids;
+                            center();
+                        },
+                    });
                 else {
                     // exports made before the API existed: drive the runtime through the keyboard
                     const key = (key: string) => svg.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
@@ -666,7 +714,10 @@ const t =
             void fig.offsetWidth; // restart the CSS animation
             fig.setAttribute("data-run", "1");
             stage.setAttribute("data-run", "1");
-            timer = window.setTimeout(() => go(current + 1 >= count ? 0 : current + 1), interval);
+            const ms = duration(current);
+            fig.style.setProperty("--dgm-iv", `${ms}ms`);
+            stage.style.setProperty("--dgm-iv", `${ms}ms`);
+            timer = window.setTimeout(() => go(current + 1 >= count ? 0 : current + 1), ms);
         };
         const paintPlay = () => {
             if (!playBtn) return;
