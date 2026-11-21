@@ -7,8 +7,8 @@ draft: false
 ---
 
 import { Image } from 'astro:assets';
+import Diagram from '../../../components/Diagram.astro';
 import capasEs from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-capas-es.webp';
-import meetPulseFlow from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-flow-es.webp';
 import meetPulseArchitecture from '../../../assets/blog/meetpulse-desktop-how-its-made/meetpulse-architecture-es.webp';
 
 MeetPulse es una aplicación de escritorio pensada que sus usuarios puedan grabar reuniones en tiempo real capturando el audio de su computador y micrófono. De esta manera, se vuelve agnóstico a la herramienta de reuniones con la que se está trabjando, No importa si es Microsoft Teams, Zoom, Google Meet, entre otros. MeetPulse lo captura sin problemas.
@@ -32,10 +32,7 @@ Hoy en día casi todo producto nuevo, ya sea, creado o no con IA nace como SaaS.
 
 Como bien se ha dicho en los puntos previos **MeetPulse** utiliza una estrategia híbrida para realizar su trabajo, permitiendo que los usuarios escojan si quieren utilizar todo 100% en local, todo 100% en la nube o decidir que quieren dejar en su equipo y quieren que salga a la nube dejando la decisión completamente a disposición del usuario.
 
-<figure>
-  <Image src={meetPulseFlow} alt="Diagrama de flujo de MeetPulse explicando el proceso end to end, desde escucha hasta el análisis final" width={1200} loading="lazy" />
-  <figcaption>Figura 2 — Flujo de MeetPulse: tú escoges que debe salir a internet y qué se queda en bajo tu control</figcaption>
-</figure>
+<Diagram name="meetpulse-flow" caption="Figura 2 (interactiva) — Flujo de MeetPulse: captura, transcripción (local o nube), almacenamiento, embeddings e Insights & Meety. Usa los botones de pasos para alternar entre 100% local, 100% nube e híbrido." />
 
 El flujo representado en el diagrama, a detalle se ve así:
 

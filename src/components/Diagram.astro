@@ -15,7 +15,12 @@
  * In MDX:   import Diagram from '../../../components/Diagram.astro';
  *           <Diagram name="meetpulse-flow" caption="Figure 1. …" />
  *
- * Props: name · caption · lang · minWidth (px under which it scrolls sideways, default 640) · maxWidth (CSS, e.g. "720px")
+ * Diagrams with steps get real HTML buttons (one per step + overview) and AUTOPLAY: once the figure is on screen it cycles
+ * through the steps. It pauses on hover/focus, when the tab/figure is hidden, after the reader picks a step, and never
+ * starts with `prefers-reduced-motion`. The SVG's own tiny stepper is hidden in favour of these controls.
+ *
+ * Props: name · caption · lang · minWidth (px under which it scrolls sideways; default ≈ 80% of the natural width)
+ *        · maxWidth (CSS, e.g. "720px") · autoplay (default true) · interval (seconds per step, default 5)
  */
 interface Props {
     name: string;
@@ -23,9 +28,11 @@ interface Props {
     lang?: "en" | "es";
     minWidth?: number;
     maxWidth?: string;
+    autoplay?: boolean;
+    interval?: number;
 }
 
-const { name, caption, minWidth = 640, maxWidth } = Astro.props;
+const { name, caption, maxWidth, autoplay = true, interval = 5 } = Astro.props;
 const lang = (Astro.props.lang ?? Astro.currentLocale ?? "en") as "en" | "es";
 
 // Build-time lookup of every exported SVG (raw text).
@@ -34,7 +41,15 @@ const files = import.meta.glob<string>("/src/diagrams/**/*.svg", {
     import: "default",
     eager: true,
 });
-const svg = files[`/src/diagrams/${name}.${lang}.svg`] ?? files[`/src/diagrams/${name}.svg`];
+const rawSvg = files[`/src/diagrams/${name}.${lang}.svg`] ?? files[`/src/diagrams/${name}.svg`];
+
+// a11y: Astro's audit flags both `tabindex` and interactive ARIA roles on SVG <g> elements, so the nodes are not made focusable here.
+// Keyboard and screen-reader users drive the diagram with the real HTML buttons below it (scenarios, play/pause, expand).
+// (Also cleans exports made by any dgm build: focusable/role attributes on <g>, and the svg is a labelled image.)
+const svg = rawSvg
+    ?.replace(/(<g [^>]*?) tabindex="0"/g, "$1")
+    .replace(/(<g [^>]*?) role="button"( aria-label="[^"]*")?/g, "$1")
+    .replace(/(<svg [^>]*class="dgm"[^>]*?) role="group"/, '$1 role="img"');
 
 if (!svg) {
     const available = Object.keys(files)
@@ -46,75 +61,242 @@ if (!svg) {
     );
 }
 
-const expandLabel = lang === "es" ? "Ver en pantalla completa" : "View full screen";
-const closeLabel = lang === "es" ? "Cerrar" : "Close";
+// natural width → default scroll threshold (≈80%: smaller than that the text is not readable)
+const natural = Number(/viewBox="0 0 ([\d.]+) /.exec(svg)?.[1] ?? 0);
+const minWidth = Astro.props.minWidth ?? (natural ? Math.min(natural, Math.max(560, Math.round(natural * 0.8))) : 640);
+
+// steps exported by the tool (data-steps='[{"title","text"}]')
+let steps: { title: string; text?: string }[] = [];
+try {
+    const raw = /data-steps='([^']*)'/.exec(svg)?.[1];
+    if (raw) steps = JSON.parse(raw.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
+} catch {
+    steps = [];
+}
+
+const t =
+    lang === "es"
+        ? { overview: "Resumen", expand: "Ampliar", expandAria: "Ver el diagrama en pantalla completa", close: "Cerrar", play: "Reproducir", pause: "Pausar", auto: "Cambio automático de escenario", steps: "Escenarios", hint: "Pasa el cursor sobre un elemento para ver sus conexiones, o elige un escenario." }
+        : { overview: "Overview", expand: "Expand", expandAria: "View the diagram full screen", close: "Close", play: "Play", pause: "Pause", auto: "Automatic scenario switching", steps: "Scenarios", hint: "Hover an element to see its connections, or pick a scenario." };
 ---
 
-<figure class="dgm-fig" data-dgm-lang={lang} style={`--dgm-min:${minWidth}px;${maxWidth ? `max-width:${maxWidth};` : ""}`}>
-    <div class="dgm-scroll">
-        <Fragment set:html={svg} />
-        <button type="button" class="dgm-expand" aria-label={expandLabel} title={expandLabel} data-close={closeLabel}>⤢</button>
+<figure
+    class="dgm-fig"
+    data-dgm-lang={lang}
+    data-autoplay={autoplay && steps.length > 1 ? "1" : "0"}
+    data-interval={Math.max(2, interval) * 1000}
+    data-has-steps={steps.length ? "1" : undefined}
+    style={`--dgm-min:${minWidth}px;${maxWidth ? `max-width:${maxWidth};` : ""}`}
+>
+    <div class="dgm-stage">
+        <div class="dgm-scroll">
+            <Fragment set:html={svg} />
+        </div>
+        <div class="dgm-bar">
+            {
+                steps.length > 0 && (
+                    <div class="dgm-tabs" role="group" aria-label={t.steps}>
+                        <button type="button" class="dgm-tab" data-step="-1" aria-pressed="true">
+                            {t.overview}
+                        </button>
+                        {steps.map((s, i) => (
+                            <button type="button" class="dgm-tab" data-step={i} aria-pressed="false">
+                                <span class="dgm-tab-n">{i + 1}</span>
+                                <span>{s.title}</span>
+                            </button>
+                        ))}
+                        {autoplay && steps.length > 1 && (
+                            <button type="button" class="dgm-play" aria-label={t.auto} data-play={t.play} data-pause={t.pause}>
+                                <span class="dgm-play-ico" aria-hidden="true" />
+                                <span class="dgm-play-txt">{t.pause}</span>
+                            </button>
+                        )}
+                    </div>
+                )
+            }
+            <button type="button" class="dgm-expand" aria-label={t.expandAria} data-close={t.close}>
+                <span aria-hidden="true">⤢</span>
+                <span>{t.expand}</span>
+            </button>
+        </div>
+        {steps.length > 0 && <p class="dgm-step-text" aria-live="polite" data-hint={t.hint}>{t.hint}</p>}
     </div>
     {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
 <style is:global>
-    .dgm-fig {
-        margin: 2em auto;
-        position: relative;
+    .dgm-fig,
+    dialog.dgm-dialog {
         /* the diagram uses the site's typefaces (the SVG falls back to its baked stacks) */
         --dgm-serif: var(--font-display);
         --dgm-sans: var(--font-sans);
     }
-    .dgm-fig .dgm-scroll {
+    .dgm-fig {
+        margin: 2em auto;
+        position: relative;
+    }
+    .dgm-stage .dgm-scroll {
         position: relative;
         overflow-x: auto;
         border: 1px solid var(--line);
-        border-radius: 0.9rem;
+        border-radius: 0.9rem 0.9rem 0 0;
         background: var(--surface);
         padding: 0.5rem;
     }
-    .dgm-fig svg.dgm {
+    .dgm-stage svg.dgm {
         display: block;
         width: 100%;
         height: auto;
         min-width: var(--dgm-min, 640px);
         margin: 0 auto;
     }
+    /* the SVG's own mini stepper is replaced by the HTML controls below */
+    .dgm-fig[data-has-steps] svg.dgm .stepper,
+    dialog.dgm-dialog svg.dgm .stepper {
+        display: none;
+    }
     .post-body .dgm-fig figcaption {
         margin-top: 0.9em;
         margin-bottom: 0;
     }
-    .dgm-fig .dgm-expand {
-        display: none;
-        position: sticky;
-        float: right;
-        top: 0;
-        right: 0;
-        margin: 0 0 -2rem auto;
-        z-index: 2;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 0.5rem;
+
+    /* ---------- controls ---------- */
+    .dgm-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        padding: 0.7rem 0.75rem;
+        border: 1px solid var(--line);
+        border-top: 0;
+        border-radius: 0 0 0.9rem 0.9rem;
+        background: var(--surface-2, var(--surface));
+        font-family: var(--font-sans);
+    }
+    .dgm-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .dgm-bar button {
+        -webkit-appearance: none;
+        appearance: none;
+        font: inherit;
+        font-size: 0.92rem;
+        font-weight: 500;
+        line-height: 1.2;
+        min-height: 2.75rem;
+        padding: 0.55rem 1.05rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         border: 1px solid var(--line-strong);
+        border-radius: 999px;
         background: var(--surface);
-        color: var(--ink-soft);
-        font-size: 0.95rem;
-        line-height: 1;
+        color: var(--ink);
         cursor: pointer;
+        user-select: none;
+        touch-action: manipulation;
+        position: relative;
+        overflow: hidden;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
     }
-    .dgm-fig[data-small] .dgm-expand {
-        display: block;
-    }
-    .dgm-fig .dgm-expand:hover {
-        color: var(--accent);
+    .dgm-bar button:hover {
         border-color: var(--accent);
+        color: var(--accent-strong);
+    }
+    .dgm-bar button:active {
+        transform: scale(0.97);
+    }
+    .dgm-bar button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+    .dgm-bar .dgm-tab[aria-pressed="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--bg);
+    }
+    .dark .dgm-bar .dgm-tab[aria-pressed="true"] {
+        color: #131416;
+    }
+    .dgm-tab-n {
+        display: inline-grid;
+        place-items: center;
+        width: 1.35rem;
+        height: 1.35rem;
+        border-radius: 50%;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        background: color-mix(in srgb, currentColor 16%, transparent);
+    }
+    /* autoplay progress inside the active tab */
+    .dgm-fig[data-run] .dgm-tab[aria-pressed="true"]::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px;
+        width: 100%;
+        background: currentColor;
+        opacity: 0.55;
+        transform-origin: left;
+        animation: dgm-progress var(--dgm-iv, 5000ms) linear forwards;
+    }
+    @keyframes dgm-progress {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+    }
+    .dgm-bar .dgm-play {
+        border-style: dashed;
+    }
+    .dgm-play-ico {
+        width: 0.22rem;
+        height: 0.85rem;
+        background: currentColor;
+        box-shadow: 0.45rem 0 0 currentColor; /* second pause bar */
+        margin-right: 0.45rem;
+    }
+    .dgm-play[data-state="paused"] .dgm-play-ico {
+        box-shadow: none;
+        width: 0.7rem;
+        margin-right: 0;
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+    }
+    .dgm-bar .dgm-expand {
+        margin-left: auto;
+    }
+    .dgm-step-text {
+        margin: 0.7rem 0 0;
+        min-height: 2.9em;
+        padding: 0 0.25rem;
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        line-height: 1.55;
+        color: var(--ink-soft);
+    }
+    .post-body .dgm-step-text {
+        margin: 0.7rem 0 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .dgm-fig[data-run] .dgm-tab[aria-pressed="true"]::after {
+            animation: none;
+            transform: none;
+        }
     }
 
-    /* full-screen viewer (a single <dialog> shared by every diagram) */
+    /* ---------- full-screen viewer (a single <dialog> shared by every diagram) ---------- */
     dialog.dgm-dialog {
-        width: min(96vw, 1500px);
-        max-height: 92vh;
+        /* Tailwind's preflight zeroes dialog margins, which pins it to the top-left: centre it again */
+        position: fixed;
+        inset: 0;
+        margin: auto;
+        height: fit-content;
+        overflow: hidden;
+        width: min(96vw, 1600px);
+        max-height: 94vh;
         padding: 0;
         border: 1px solid var(--line-strong);
         border-radius: 0.9rem;
@@ -122,40 +304,57 @@ const closeLabel = lang === "es" ? "Cerrar" : "Close";
         color: var(--ink);
     }
     dialog.dgm-dialog::backdrop {
-        background: rgba(0, 0, 0, 0.55);
+        background: rgba(0, 0, 0, 0.6);
     }
-    dialog.dgm-dialog .dgm-bar {
+    dialog.dgm-dialog .dgm-top {
         position: sticky;
         top: 0;
         z-index: 3;
         display: flex;
         justify-content: flex-end;
-        gap: 0.4rem;
-        padding: 0.5rem;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem;
         background: var(--surface);
     }
-    dialog.dgm-dialog .dgm-bar button {
-        min-width: 2.1rem;
-        height: 2rem;
-        padding: 0 0.5rem;
-        border-radius: 0.5rem;
+    dialog.dgm-dialog .dgm-top button {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        padding: 0 0.8rem;
+        border-radius: 999px;
         border: 1px solid var(--line-strong);
         background: transparent;
         color: inherit;
         font-family: var(--font-mono);
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         cursor: pointer;
+    }
+    dialog.dgm-dialog .dgm-top button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
     }
     dialog.dgm-dialog .dgm-body {
         overflow: auto;
-        max-height: calc(92vh - 3.2rem);
+        max-height: calc(94vh - 4rem);
         padding: 0 0.75rem 0.75rem;
+    }
+    dialog.dgm-dialog .dgm-stage .dgm-scroll {
+        border-radius: 0.9rem 0.9rem 0 0;
     }
     dialog.dgm-dialog svg.dgm {
         display: block;
         max-width: none;
         min-width: 0;
         height: auto;
+        margin: 0;
+    }
+    dialog.dgm-dialog .dgm-expand {
+        display: none;
+    }
+    dialog.dgm-dialog .dgm-bar {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
     }
 </style>
 
@@ -169,32 +368,128 @@ const closeLabel = lang === "es" ? "Cerrar" : "Close";
     syncMode();
     new MutationObserver(syncMode).observe(root, { attributes: true, attributeFilter: ["class"] });
 
-    // 2) show the "full screen" button only when the diagram is drawn noticeably smaller than its natural size
-    const figures = Array.from(document.querySelectorAll<HTMLElement>(".dgm-fig"));
-    const measure = (fig: HTMLElement) => {
-        const svg = fig.querySelector<SVGSVGElement>("svg.dgm");
-        if (!svg) return;
-        const natural = svg.viewBox.baseVal.width || 0;
-        const shown = svg.getBoundingClientRect().width;
-        if (natural && shown / natural < 0.8) fig.setAttribute("data-small", "");
-        else fig.removeAttribute("data-small");
-    };
-    if ("ResizeObserver" in window) {
-        const ro = new ResizeObserver((entries) => entries.forEach((e) => measure(e.target as HTMLElement)));
-        figures.forEach((f) => ro.observe(f));
-    }
-    figures.forEach(measure);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // 3) full-screen viewer: the live <svg> is MOVED into the dialog (so hover/steps keep working) and moved back on close
+    // 2) scenario controls (real buttons) + autoplay
+    type Api = { show: (k: number) => void; current: () => number };
+    const figures = Array.from(document.querySelectorAll<HTMLElement>(".dgm-fig"));
+    figures.forEach((fig) => {
+        const stage = fig.querySelector<HTMLElement>(".dgm-stage")!;
+        const svg = stage.querySelector<SVGSVGElement>("svg.dgm");
+        const tabs = Array.from(stage.querySelectorAll<HTMLButtonElement>(".dgm-tab"));
+        if (!svg || !tabs.length) return;
+        const text = stage.querySelector<HTMLElement>(".dgm-step-text");
+        const playBtn = stage.querySelector<HTMLButtonElement>(".dgm-play");
+        let data: { title: string; text?: string }[] = [];
+        try {
+            data = JSON.parse(svg.getAttribute("data-steps") || "[]");
+        } catch {
+            data = [];
+        }
+        const count = data.length;
+        const interval = Number(fig.dataset.interval) || 5000;
+        fig.style.setProperty("--dgm-iv", `${interval}ms`);
+
+        let current = -1;
+        const go = (k: number) => {
+            current = k;
+            const api = (svg as unknown as { dgm?: Api }).dgm;
+            if (api) api.show(k);
+            else {
+                // exports made before the API existed: drive the runtime through the keyboard
+                const key = (key: string) => svg.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+                key("Escape");
+                for (let i = 0; i <= k; i++) key("ArrowRight");
+            }
+            // the diagram is larger than its column: slide the view so the highlighted part is centred
+            const sc = svg.closest<HTMLElement>(".dgm-scroll");
+            if (sc && sc.scrollWidth > sc.clientWidth + 4) {
+                let left = 0;
+                if (k >= 0) {
+                    const box = sc.getBoundingClientRect();
+                    const hl = Array.from(svg.querySelectorAll(".el.hl:not(.edge)")).map((e) => e.getBoundingClientRect());
+                    if (hl.length) {
+                        const min = Math.min(...hl.map((r) => r.left));
+                        const max = Math.max(...hl.map((r) => r.right));
+                        left = sc.scrollLeft + (min + max) / 2 - box.left - sc.clientWidth / 2;
+                    } else left = sc.scrollLeft;
+                }
+                sc.scrollTo({ left: Math.max(0, left), behavior: reduced ? "auto" : "smooth" });
+            }
+            tabs.forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.step) === k)));
+            if (text) text.textContent = k < 0 ? (text.dataset.hint ?? "") : (data[k]?.text ?? data[k]?.title ?? "");
+            progress();
+        };
+
+        // autoplay: only while the figure is visible, not hovered/focused, tab visible, and the reader has not taken over
+        let playing = fig.dataset.autoplay === "1" && !reduced;
+        let visible = false;
+        let engaged = false;
+        let started = false;
+        let timer = 0;
+        // in the full-screen viewer the diagram is the only thing on screen: no hover-pause there
+        const running = () => {
+            const zoomed = !!stage.closest("dialog");
+            return playing && (visible || zoomed) && (!engaged || zoomed) && !document.hidden;
+        };
+        const progress = () => {
+            window.clearTimeout(timer);
+            fig.removeAttribute("data-run");
+            if (!running()) return;
+            void fig.offsetWidth; // restart the CSS animation
+            fig.setAttribute("data-run", "1");
+            timer = window.setTimeout(() => go(current + 1 >= count ? 0 : current + 1), interval);
+        };
+        const paintPlay = () => {
+            if (!playBtn) return;
+            playBtn.dataset.state = playing ? "playing" : "paused";
+            const label = playing ? playBtn.dataset.pause! : playBtn.dataset.play!;
+            playBtn.querySelector(".dgm-play-txt")!.textContent = label;
+        };
+        paintPlay();
+
+        tabs.forEach((b) =>
+            b.addEventListener("click", () => {
+                playing = false; // the reader took over
+                paintPlay();
+                go(Number(b.dataset.step));
+            }),
+        );
+        playBtn?.addEventListener("click", () => {
+            playing = !playing;
+            paintPlay();
+            if (playing && current < 0) go(0);
+            else progress();
+        });
+        stage.addEventListener("pointerenter", () => ((engaged = true), progress()));
+        stage.addEventListener("pointerleave", () => ((engaged = false), progress()));
+        stage.addEventListener("focusin", () => ((engaged = true), progress()));
+        stage.addEventListener("focusout", () => ((engaged = false), progress()));
+        document.addEventListener("visibilitychange", progress);
+        new IntersectionObserver(
+            (es) => {
+                visible = es.some((e) => e.isIntersecting);
+                if (visible && playing && !started) {
+                    started = true;
+                    go(0);
+                } else progress();
+            },
+            { threshold: 0.4 },
+        ).observe(fig);
+        (fig as HTMLElement & { _dgmRefresh?: () => void })._dgmRefresh = progress;
+    });
+
+    // 3) full-screen viewer: the whole live stage (svg + controls) is MOVED into the dialog and moved back on close
     let dialog: HTMLDialogElement | null = null;
     let zoomLabel: HTMLButtonElement;
-    let home: { svg: SVGSVGElement; parent: HTMLElement; next: ChildNode | null } | null = null;
+    let home: { stage: HTMLElement; fig: HTMLElement; next: ChildNode | null } | null = null;
     let zoom = 1;
+    let fitZoom = 1;
+    const natural = (svg: SVGSVGElement) => svg.viewBox.baseVal.width;
     const applyZoom = () => {
         const svg = dialog?.querySelector<SVGSVGElement>("svg.dgm");
         if (!svg) return;
-        const natural = svg.viewBox.baseVal.width;
-        svg.style.width = `${natural * zoom}px`;
+        svg.style.width = `${natural(svg) * zoom}px`;
         zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
     };
     const ensureDialog = (closeText: string) => {
@@ -202,27 +497,27 @@ const closeLabel = lang === "es" ? "Cerrar" : "Close";
         dialog = document.createElement("dialog");
         dialog.className = "dgm-dialog";
         dialog.innerHTML =
-            `<div class="dgm-bar"><button type="button" data-z="-">−</button><button type="button" data-z="0"></button>` +
-            `<button type="button" data-z="+">+</button><button type="button" data-z="x" aria-label="${closeText}">✕</button></div>` +
+            `<div class="dgm-top"><button type="button" data-z="-" aria-label="−">−</button><button type="button" data-z="0"></button>` +
+            `<button type="button" data-z="+" aria-label="+">+</button><button type="button" data-z="x" aria-label="${closeText}">✕</button></div>` +
             `<div class="dgm-body"></div>`;
         zoomLabel = dialog.querySelector('[data-z="0"]') as HTMLButtonElement;
         dialog.addEventListener("click", (e) => {
             const t = e.target as HTMLElement;
             if (t === dialog) dialog!.close();
-            const z = t.closest<HTMLElement>("[data-z]")?.dataset.z;
+            const z = t.closest<HTMLElement>(".dgm-top [data-z]")?.dataset.z;
             if (z === "x") dialog!.close();
-            else if (z === "-") zoom = Math.max(0.4, zoom - 0.25);
-            else if (z === "+") zoom = Math.min(4, zoom + 0.25);
-            else if (z === "0") zoom = 1;
+            else if (z === "-") zoom = Math.max(0.3, zoom - 0.15);
+            else if (z === "+") zoom = Math.min(3, zoom + 0.15);
+            else if (z === "0") zoom = fitZoom;
             if (z && z !== "x") applyZoom();
         });
         dialog.addEventListener("close", () => {
             if (!home) return;
-            const svg = dialog!.querySelector<SVGSVGElement>("svg.dgm");
-            if (svg) {
-                svg.style.width = "";
-                home.parent.insertBefore(svg, home.next);
-            }
+            const stage = dialog!.querySelector<HTMLElement>(".dgm-stage");
+            const svg = stage?.querySelector<SVGSVGElement>("svg.dgm");
+            if (svg) svg.style.width = "";
+            if (stage) home.fig.insertBefore(stage, home.next);
+            (home.fig as HTMLElement & { _dgmRefresh?: () => void })._dgmRefresh?.();
             home = null;
         });
         document.body.appendChild(dialog);
@@ -231,13 +526,18 @@ const closeLabel = lang === "es" ? "Cerrar" : "Close";
     document.addEventListener("click", (e) => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".dgm-expand");
         if (!btn) return;
-        const svg = btn.parentElement?.querySelector<SVGSVGElement>("svg.dgm");
-        if (!svg || !svg.parentElement) return;
+        const stage = btn.closest<HTMLElement>(".dgm-stage");
+        const fig = stage?.parentElement;
+        const svg = stage?.querySelector<SVGSVGElement>("svg.dgm");
+        if (!stage || !fig || !svg) return;
         const d = ensureDialog(btn.dataset.close ?? "Close");
-        home = { svg, parent: svg.parentElement, next: svg.nextSibling };
-        d.querySelector(".dgm-body")!.appendChild(svg);
-        zoom = 1;
+        home = { stage, fig, next: stage.nextSibling };
+        d.querySelector(".dgm-body")!.appendChild(stage);
         d.showModal();
+        const avail = (d.querySelector(".dgm-body") as HTMLElement).clientWidth - 48;
+        fitZoom = Math.min(1, avail / natural(svg));
+        zoom = fitZoom;
         applyZoom();
+        (fig as HTMLElement & { _dgmRefresh?: () => void })._dgmRefresh?.();
     });
 </script>

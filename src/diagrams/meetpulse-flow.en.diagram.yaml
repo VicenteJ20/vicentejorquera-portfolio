@@ -1,0 +1,85 @@
+type: flow
+title: MeetPulse — solution flow
+description: "End-to-end flow of MeetPulse Desktop: capture, transcription (local or cloud), local storage, embeddings, and the Insights & Meety assistant."
+direction: RIGHT
+font: mixed
+variants:
+  narrow: {}
+nodes:
+  - id: capture
+    label: Capture & mix engine
+    sublabel: mic + system audio
+    icon: lu-audio-waveform
+  - id: transcribe-local
+    label: Whisper / Parakeet
+    sublabel: local transcription
+    icon: lu-cpu-ai
+    tone: compute
+  - id: gateway-tx
+    label: Vercel AI Gateway
+    sublabel: transcription
+    icon: lu-cloud
+    tone: network
+    stackWith: transcribe-local
+  - id: mai
+    label: MAI Transcribe 2
+    sublabel: Microsoft (cloud)
+    icon: lu-cpu-ai
+    tone: compute
+    stackWith: gateway-tx
+  - id: storage
+    label: SQLite + audio files
+    sublabel: meetings, transcripts, vectors
+    icon: lu-database
+    tone: data
+  - id: embeddings
+    label: Local embeddings
+    sublabel: small model → vectors
+    icon: lu-brain-circuit
+    tone: data
+    stackWith: storage
+  - id: insights
+    label: Insights & Meety
+    sublabel: coach, summaries, search
+    icon: lu-message-circle
+    tone: accent
+  - id: analyze-local
+    label: Gemma 4 E2B / Qwen
+    sublabel: local analysis
+    icon: lu-cpu-ai
+    tone: compute
+  - id: gateway-ai
+    label: Vercel AI Gateway
+    sublabel: analysis
+    icon: lu-cloud
+    tone: network
+  - id: cloudmodels
+    label: Cloud AI models
+    sublabel: chat & insights
+    icon: lu-cloud
+    tone: network
+edges:
+  - { from: capture, to: transcribe-local, label: local mode, flow: true }
+  - { from: capture, to: gateway-tx, label: cloud mode, style: dashed, flow: true }
+  - { from: transcribe-local, to: storage, label: text }
+  - { from: gateway-tx, to: storage, label: text }
+  - { from: gateway-tx, to: mai, label: uses }
+  - { from: storage, to: embeddings, label: index }
+  - { from: embeddings, to: insights, label: vectors }
+  - { from: storage, to: insights, label: data }
+  - { from: insights, to: analyze-local, label: local mode }
+  - { from: insights, to: gateway-ai, label: cloud mode, style: dashed, both: true }
+  - { from: gateway-ai, to: cloudmodels, label: uses }
+legend:
+  - { style: solid, label: Stays on your PC }
+  - { style: dashed, label: Leaves your PC (optional) }
+steps:
+  - title: "100% local"
+    text: "Transcription with Whisper/Parakeet and analysis with Gemma/Qwen — nothing leaves your PC."
+    show: [capture, transcribe-local, storage, embeddings, insights, analyze-local]
+  - title: "100% cloud"
+    text: "Transcription with MAI Transcribe 2 and analysis via Vercel AI Gateway."
+    show: [capture, gateway-tx, mai, storage, embeddings, insights, gateway-ai, cloudmodels]
+  - title: Hybrid
+    text: "Local transcription + cloud analysis via Vercel AI Gateway."
+    show: [capture, transcribe-local, storage, embeddings, insights, gateway-ai, cloudmodels]

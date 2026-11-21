@@ -1,0 +1,85 @@
+type: flow
+title: MeetPulse — flujo de la solución
+description: "Flujo completo de MeetPulse Desktop: captura, transcripción (local o nube), almacenamiento local, embeddings y el asistente Insights & Meety."
+direction: RIGHT
+font: mixed
+variants:
+  narrow: {}
+nodes:
+  - id: capture
+    label: Motor de captura y mezcla
+    sublabel: mic + audio del sistema
+    icon: lu-audio-waveform
+  - id: transcribe-local
+    label: Whisper / Parakeet
+    sublabel: transcripción local
+    icon: lu-cpu-ai
+    tone: compute
+  - id: gateway-tx
+    label: Vercel AI Gateway
+    sublabel: transcripción
+    icon: lu-cloud
+    tone: network
+    stackWith: transcribe-local
+  - id: mai
+    label: MAI Transcribe 2
+    sublabel: Microsoft (nube)
+    icon: lu-cpu-ai
+    tone: compute
+    stackWith: gateway-tx
+  - id: storage
+    label: SQLite + archivos de audio
+    sublabel: reuniones, transcripciones, vectores
+    icon: lu-database
+    tone: data
+  - id: embeddings
+    label: Embeddings locales
+    sublabel: modelo pequeño → vectores
+    icon: lu-brain-circuit
+    tone: data
+    stackWith: storage
+  - id: insights
+    label: Insights & Meety
+    sublabel: coach, resúmenes, búsqueda
+    icon: lu-message-circle
+    tone: accent
+  - id: analyze-local
+    label: Gemma 4 E2B / Qwen
+    sublabel: análisis local
+    icon: lu-cpu-ai
+    tone: compute
+  - id: gateway-ai
+    label: Vercel AI Gateway
+    sublabel: análisis
+    icon: lu-cloud
+    tone: network
+  - id: cloudmodels
+    label: Modelos IA en la nube
+    sublabel: chat e insights
+    icon: lu-cloud
+    tone: network
+edges:
+  - { from: capture, to: transcribe-local, label: modo local, flow: true }
+  - { from: capture, to: gateway-tx, label: modo nube, style: dashed, flow: true }
+  - { from: transcribe-local, to: storage, label: texto }
+  - { from: gateway-tx, to: storage, label: texto }
+  - { from: gateway-tx, to: mai, label: usa }
+  - { from: storage, to: embeddings, label: indexa }
+  - { from: embeddings, to: insights, label: vectores }
+  - { from: storage, to: insights, label: datos }
+  - { from: insights, to: analyze-local, label: modo local }
+  - { from: insights, to: gateway-ai, label: modo nube, style: dashed, both: true }
+  - { from: gateway-ai, to: cloudmodels, label: usa }
+legend:
+  - { style: solid, label: Se queda en tu PC }
+  - { style: dashed, label: Sale de tu PC (opcional) }
+steps:
+  - title: "100% local"
+    text: "Transcripción con Whisper/Parakeet y análisis con Gemma/Qwen: nada sale de tu PC."
+    show: [capture, transcribe-local, storage, embeddings, insights, analyze-local]
+  - title: "100% en la nube"
+    text: "Transcripción con MAI Transcribe 2 y análisis vía Vercel AI Gateway."
+    show: [capture, gateway-tx, mai, storage, embeddings, insights, gateway-ai, cloudmodels]
+  - title: Híbrido
+    text: "Transcripción local + análisis en la nube vía Vercel AI Gateway."
+    show: [capture, transcribe-local, storage, embeddings, insights, gateway-ai, cloudmodels]

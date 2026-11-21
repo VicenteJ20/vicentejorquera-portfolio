@@ -54,7 +54,9 @@ import Diagram from '../../../components/Diagram.astro';
 
 (`name` has no extension and no language suffix: `<Diagram>` picks `<name>.<lang>.svg` for the page's locale and falls back to `<name>.svg`.
 Put the `import` with the other imports at the top, once per file; reuse it for every diagram in that file.)
-Optional props: `lang="es"`, `minWidth={520}`, `maxWidth="720px"`. For a static image instead, use
+Diagrams with `steps` get big real buttons (overview + one per step) and **autoplay** (cycles every 5 s once on screen; pauses on hover/focus
+or when the reader picks a step; off with `prefers-reduced-motion`). Optional props: `lang="es"`, `minWidth={520}`, `maxWidth="720px"`,
+`autoplay={false}`, `interval={8}` (seconds per step). For a static image instead, use
 `<img src="/diagrams/<name>.<lang>.png" alt="…" loading="lazy" />` inside a `<figure>`.
 
 ### After integrating
