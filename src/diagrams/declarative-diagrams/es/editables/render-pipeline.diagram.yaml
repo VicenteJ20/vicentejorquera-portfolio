@@ -1,0 +1,31 @@
+type: flow
+theme: olive
+title: El recorrido de un diagrama
+description: El YAML se parsea y se valida, ELK calcula las posiciones con el algoritmo layered, el resultado se dibuja como SVG y ese SVG puede convertirse a PNG con @resvg/resvg-js. Todo corre en local.
+direction: RIGHT
+nodes:
+  - { id: yaml, label: YAML, sublabel: archivo fuente, kind: io, icon: lu-file-code }
+  - { id: parse, label: Parsea y valida, sublabel: esquema Zod, kind: process, icon: lu-check-circle }
+  - { id: elk, label: ELK calcula, sublabel: algoritmo layered, kind: process, icon: lu-layout }
+  - { id: svg, label: SVG, sublabel: dibujado, kind: end, icon: lu-image, tone: data }
+  - { id: png, label: PNG, sublabel: "@resvg/resvg-js", kind: end, icon: lu-image-down, stackWith: svg }
+edges:
+  - { from: yaml, to: parse, flow: true }
+  - { from: parse, to: elk, flow: true }
+  - { from: elk, to: svg, flow: true }
+  - { from: svg, to: png, label: opcional, style: dashed }
+notes:
+  - { target: elk, text: "Todo el cálculo corre en local, sin navegador. El servidor MCP no usa la red." }
+legend:
+  - { style: solid, label: Recorrido principal }
+  - { style: dashed, label: Salida opcional }
+steps:
+  - { title: "1 · Se parsea y valida", show: [yaml, parse] }
+  - { title: "2 · ELK calcula el layout", show: [parse, elk] }
+  - { title: "3 · Se dibuja el SVG", show: [elk, svg] }
+  - { title: "4 · Export opcional a PNG", show: [svg, png] }
+variants:
+  narrow:
+    nodes:
+      elk: { sublabel: layered }
+      png: { stackWith: null, sublabel: resvg-js }

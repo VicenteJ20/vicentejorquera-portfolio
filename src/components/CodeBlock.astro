@@ -1,0 +1,169 @@
+---
+/**
+ * Reusable wrapper for code in MDX posts: fixed max height with scroll, copy button,
+ * light/dark aware. Wrap a normal fenced block:
+ *
+ *   <CodeBlock title="aws-genai-chatbot.diagram.yaml" lang="yml" maxHeight="28rem">
+ *
+ *   ```yml
+ *   ...
+ *   ```
+ *
+ *   </CodeBlock>
+ *
+ * Keep a blank line between the tag and the fence so MDX parses the fence as markdown.
+ */
+interface Props {
+  title?: string;
+  /** Label shown in the header (defaults to nothing). */
+  lang?: string;
+  /** Any CSS length. Content taller than this scrolls. */
+  maxHeight?: string;
+  copyLabel?: string;
+  copiedLabel?: string;
+}
+const {
+  title,
+  lang,
+  maxHeight = '24rem',
+  copyLabel = 'Copiar',
+  copiedLabel = '¡Copiado!',
+} = Astro.props;
+---
+
+<div
+  class="code-block"
+  data-code-block
+  data-copy-label={copyLabel}
+  data-copied-label={copiedLabel}
+  style={`--code-max-h:${maxHeight}`}
+>
+  <div class="code-block__bar">
+    <span class="code-block__title">{title ?? lang ?? ''}</span>
+    {title && lang && <span class="code-block__lang">{lang}</span>}
+    <button type="button" class="code-block__copy" data-copy aria-label={copyLabel}>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      <span data-copy-text>{copyLabel}</span>
+    </button>
+  </div>
+  <div class="code-block__body" tabindex="0">
+    <slot />
+  </div>
+</div>
+
+<style is:global>
+  .code-block {
+    margin: 1.7em 0;
+    border: 1px solid var(--line);
+    border-radius: 0.9rem;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .code-block__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem 0.45rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-align: left;
+    line-height: 1.4;
+    margin: 0;
+  }
+  .code-block__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .code-block__lang {
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .code-block__copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .code-block__copy:hover { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); }
+  .code-block__copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .code-block__copy[data-done] { color: var(--accent-strong); border-color: var(--accent); }
+
+  .code-block__body {
+    max-height: var(--code-max-h, 24rem);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .code-block__body:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  /* the inner <pre> must not draw its own card, scroll or margins */
+  .code-block .code-block__body pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    min-width: max-content;
+    white-space: pre;
+  }
+  .code-block .code-block__body pre code { white-space: pre; }
+
+  /* Shiki dual-theme: follow the site's `.dark` class instead of prefers-color-scheme */
+  .dark .astro-code,
+  .dark .astro-code span { color: var(--shiki-dark) !important; }
+  /* the block sits on the site's own surface in both themes */
+  .code-block .astro-code { background-color: transparent !important; }
+</style>
+
+<script>
+  function init() {
+    document.querySelectorAll<HTMLElement>('[data-code-block]').forEach((root) => {
+      if (root.dataset.ready) return;
+      root.dataset.ready = '1';
+      const btn = root.querySelector<HTMLButtonElement>('[data-copy]');
+      const label = root.querySelector<HTMLElement>('[data-copy-text]');
+      const body = root.querySelector<HTMLElement>('.code-block__body');
+      if (!btn || !label || !body) return;
+      let timer: number | undefined;
+      btn.addEventListener('click', async () => {
+        const code = body.querySelector('pre code') ?? body.querySelector('pre') ?? body;
+        const text = (code.textContent ?? '').replace(/\n$/, '');
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        label.textContent = root.dataset.copiedLabel ?? 'Copied';
+        btn.setAttribute('data-done', '');
+        clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          label.textContent = root.dataset.copyLabel ?? 'Copy';
+          btn.removeAttribute('data-done');
+        }, 1800);
+      });
+    });
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

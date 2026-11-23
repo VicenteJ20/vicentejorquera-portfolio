@@ -1,0 +1,107 @@
+# Needs the official AWS icons imported locally:  dgm icons update   (see docs/icons.md)
+type: architecture
+look: official
+title: GenerativeAI-powered chatbot solution
+subtitle: Chatbot solution to provide the sales department of the company with a virtual assistant, which can summarize knowledge base data and help quickly find relevant information.
+description: Retrieval-augmented chatbot on AWS - web frontend, authenticated API, RAG Lambda with an LLM provider, and a daily ingestion pipeline.
+direction: RIGHT
+notesPosition: below
+nodes:
+  - { id: sales, label: Sales representative, icon: lu-user, placement: left }
+  - { id: corp, label: Corporate storage, icon: lu-files, placement: left }
+  - id: aws
+    label: AWS Cloud
+    kind: cloud
+    icon: aws-cloud
+    children:
+      # three groups by responsibility (how AWS documentation organises such diagrams)
+      - id: g-web
+        label: Web delivery
+        kind: group
+        children:
+          - { id: cdn, label: CloudFront, icon: aws-cloudfront }
+          - { id: web, label: S3, sublabel: Static website, icon: aws-s3 }
+          - { id: r53, label: Route 53, icon: aws-route53 }
+          - { id: waf, label: AWS WAF, icon: aws-waf }
+      - id: g-api
+        label: Chat backend
+        kind: group
+        children:
+          - { id: apigw, label: API Gateway, icon: aws-api-gateway }
+          - { id: cognito, label: Cognito, icon: aws-cognito }
+          - { id: edge, label: Lambda@Edge, icon: aws-lambda, stackWith: cognito }
+          - { id: orch, label: Lambda, sublabel: Orchestrator, icon: aws-lambda }
+          - { id: sessions, label: DynamoDB, sublabel: User sessions, icon: aws-dynamodb }
+          - { id: rag, label: Lambda, sublabel: RAG, icon: aws-lambda }
+          - { id: ssm, label: SSM Parameter Store, sublabel: API token, icon: aws-res-systems-manager-parameter-store }
+          - { id: llm, label: Amazon Bedrock, sublabel: AgentCore, icon: aws-bedrock }
+          - { id: aurora, label: Aurora, sublabel: Embeddings, icon: aws-aurora }
+      - id: g-data
+        label: Knowledge base ingestion
+        kind: group
+        children:
+          - { id: sched1, label: EventBridge Scheduler, icon: aws-res-eventbridge-scheduler }
+          - { id: pipeline, label: ECS, sublabel: Data pipeline, icon: aws-elastic-container-service }
+          - { id: kb, label: S3, sublabel: Knowledge base, icon: aws-s3 }
+          - { id: sched2, label: EventBridge Scheduler, icon: aws-res-eventbridge-scheduler }
+          - id: sfn
+            label: AWS Step Functions workflow
+            kind: group
+            icon: aws-step-functions
+            color: "#E7157B"
+            border: solid
+            children:
+              - { id: batch, label: SageMaker, sublabel: BatchTransform, icon: aws-sagemaker }
+              - { id: langchain, label: ECS, sublabel: Langchain, icon: aws-elastic-container-service }
+edges:
+  # 3 · web delivery
+  - { from: sales, to: cdn, flow: true }
+  - { from: r53, to: cdn, style: dashed }
+  - { from: waf, to: cdn, style: dashed }
+  - { from: cdn, to: web, flow: true }
+  # 4 · routing and authentication
+  - { from: cdn, to: apigw, flow: true }
+  - { from: apigw, to: cognito }
+  - { from: edge, to: cognito, style: dashed }
+  # 5 · orchestration and session log
+  - { from: apigw, to: orch, flow: true }
+  - { from: orch, to: sessions }
+  - { from: orch, to: rag, flow: true }
+  # 6 · RAG query and LLM inference
+  - { from: rag, to: ssm }
+  - { from: rag, to: aurora }
+  - { from: rag, to: llm, flow: true }
+  # 1 · daily ingestion
+  - { from: sched1, to: pipeline, style: dashed }
+  - { from: corp, to: pipeline }
+  - { from: pipeline, to: kb }
+  # 2 · embeddings
+  - { from: sched2, to: sfn, style: dashed }
+  - { from: kb, to: batch }
+  - { from: batch, to: langchain }
+  - { from: langchain, to: aurora }
+notes:
+  - { target: pipeline, text: "Daily data ingestion. EventBridge Scheduler triggers an ECS task every day to fetch data files with a predefined format and creation date from the corporate storage, then copies them to an S3 bucket partitioned by date." }
+  - { target: sfn, text: "Processing and embeddings. EventBridge Scheduler starts a Step Functions workflow in two steps: a SageMaker BatchTransform job extracts the information from the documents and saves it to S3, then an ECS task generates the embeddings and stores them in Aurora." }
+  - { target: web, text: "Web frontend delivery and security. A static website is hosted on S3 behind a CloudFront distribution, with its DNS name registered in Route 53. AWS WAF inspects every request as an additional layer of security." }
+  - { target: cognito, text: "User routing and authentication. API Gateway authenticates users and routes requests to a Lambda function. Authentication is handled by a Cognito user pool, with the help of a Lambda@Edge function." }
+  - { target: sessions, text: "Orchestration and session log. The orchestrator Lambda is ultimately responsible for returning the response to the client. It first records the session in DynamoDB, then invokes the Retrieval-Augmented Generation (RAG) Lambda." }
+  - { target: ssm, text: "RAG query and agent inference. The RAG Lambda reads the API token from SSM Parameter Store, retrieves the relevant embeddings from Aurora and sends them with the user's query to Amazon Bedrock AgentCore, which runs the agent and the LLM. The answer goes back to the orchestrator." }
+legend:
+  - { style: solid, label: Request / data path }
+  - { style: dashed, label: "Trigger or control" }
+steps:
+  - { title: 1 · Daily ingestion, show: [sched1, corp, pipeline, kb] }
+  - { title: 2 · Embeddings, show: [sched2, kb, sfn, batch, langchain, aurora] }
+  - { title: 3 · Web delivery, show: [sales, r53, waf, cdn, web] }
+  - { title: 4 · Routing and auth, show: [cdn, apigw, cognito, edge] }
+  - { title: 5 · Orchestration, show: [apigw, orch, sessions, rag] }
+  - { title: 6 · RAG and inference, show: [orch, rag, ssm, aurora, llm] }
+variants:
+  # phone version: the full diagram (same nodes, arrows, notes and scenarios) in a single column; groups are chained top to bottom
+  narrow:
+    chain: [g-data, g-web, g-api]
+    nodes:
+      sales: { label: Sales rep }
+      edge: { stackWith: null }
+      ssm: { label: SSM, sublabel: API token }
