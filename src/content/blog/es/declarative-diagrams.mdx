@@ -1,0 +1,214 @@
+---
+title: "Declarative Diagrams"
+description: "Un recorrido por las entrañas de Declarative Diagrams — una solución para crear diagramas de forma estandarizada utilizando definiciones en yml"
+pubDate: 2026-11-22
+tags: ["arquitectura", "ia", "open-source"]
+draft: false
+---
+
+import CodeBlock from '../../../components/CodeBlock.astro';
+import Diagram from '../../../components/Diagram.astro';
+
+Declarative Diagrams es una herramienta open source para crear diagramas escribiéndolos en YAML. Con ese texto genera un SVG interactivo, un PNG o un componente `<Diagram />` para sitios MDX/React. Su uso principal es dibujar arquitecturas de AWS y Azure con sus iconos oficiales, aunque también sirve para diagramas de flujo y con un estilo visual propio. Ese estilo propio es el que uso para los diagramas interactivos de mi blog. Incluye además un servidor MCP, una skill y un agente para que un asistente de IA pueda crear un diagrama, verlo renderizado y corregirlo.
+
+## Por qué construí Declarative Diagrams
+
+Hace un tiempo me encontré con el mismo problema una y otra vez. Diseño soluciones de arquitectura para mis proyectos y necesitaba tres cosas: diagramas de arquitectura en AWS y Azure, que es lo que los equipos reconocen de inmediato; diagramas de flujo; y un estilo visual propio, tanto para los entregables de clientes como para los diagramas interactivos que quería publicar en mi blog. Ninguna herramienta que probé cubría todo bien. Y cada cambio significaba abrir una aplicación visual, mover cajas a mano, exportar y pegar la imagen en la documentación. Al final, el diagrama quedaba desactualizado.
+
+Así nació *Declarative Diagrams*. La idea es sencilla: si un diagrama es un archivo de texto, puedo versionarlo, revisarlo en un pull request, validarlo y renderizarlo donde haga falta. Y, de paso, un asistente de IA puede escribirlo y corregirlo.
+
+## Como se ve crear un diagrama en "**Declarative Diagrams**"
+
+Un diagrama de arquitectura con estilo AWS se escribe así:
+
+<CodeBlock title="aws-genai-chatbot.diagram.yaml" lang="yml" maxHeight="28rem">
+
+```yml
+# Needs the official AWS icons imported locally:  dgm icons update   (see docs/icons.md)
+type: architecture
+look: official
+title: GenerativeAI-powered chatbot solution
+subtitle: Chatbot solution to provide the sales department of the company with a virtual assistant, which can summarize knowledge base data and help quickly find relevant information.
+description: Retrieval-augmented chatbot on AWS - web frontend, authenticated API, RAG Lambda with an LLM provider, and a daily ingestion pipeline.
+direction: RIGHT
+notesPosition: below
+nodes:
+  - { id: sales, label: Sales representative, icon: lu-user, placement: left }
+  - { id: corp, label: Corporate storage, icon: lu-files, placement: left }
+  - id: aws
+    label: AWS Cloud
+    kind: cloud
+    icon: aws-cloud
+    children:
+      # three groups by responsibility (how AWS documentation organises such diagrams)
+      - id: g-web
+        label: Web delivery
+        kind: group
+        children:
+          - { id: cdn, label: CloudFront, icon: aws-cloudfront }
+          - { id: web, label: S3, sublabel: Static website, icon: aws-s3 }
+          - { id: r53, label: Route 53, icon: aws-route53 }
+          - { id: waf, label: AWS WAF, icon: aws-waf }
+      - id: g-api
+        label: Chat backend
+        kind: group
+        children:
+          - { id: apigw, label: API Gateway, icon: aws-api-gateway }
+          - { id: cognito, label: Cognito, icon: aws-cognito }
+          - { id: edge, label: Lambda@Edge, icon: aws-lambda, stackWith: cognito }
+          - { id: orch, label: Lambda, sublabel: Orchestrator, icon: aws-lambda }
+          - { id: sessions, label: DynamoDB, sublabel: User sessions, icon: aws-dynamodb }
+          - { id: rag, label: Lambda, sublabel: RAG, icon: aws-lambda }
+          - { id: ssm, label: SSM Parameter Store, sublabel: API token, icon: aws-res-systems-manager-parameter-store }
+          - { id: llm, label: Amazon Bedrock, sublabel: AgentCore, icon: aws-bedrock }
+          - { id: aurora, label: Aurora, sublabel: Embeddings, icon: aws-aurora }
+      - id: g-data
+        label: Knowledge base ingestion
+        kind: group
+        children:
+          - { id: sched1, label: EventBridge Scheduler, icon: aws-res-eventbridge-scheduler }
+          - { id: pipeline, label: ECS, sublabel: Data pipeline, icon: aws-elastic-container-service }
+          - { id: kb, label: S3, sublabel: Knowledge base, icon: aws-s3 }
+          - { id: sched2, label: EventBridge Scheduler, icon: aws-res-eventbridge-scheduler }
+          - id: sfn
+            label: AWS Step Functions workflow
+            kind: group
+            icon: aws-step-functions
+            color: "#E7157B"
+            border: solid
+            children:
+              - { id: batch, label: SageMaker, sublabel: BatchTransform, icon: aws-sagemaker }
+              - { id: langchain, label: ECS, sublabel: Langchain, icon: aws-elastic-container-service }
+edges:
+  # 3 · web delivery
+  - { from: sales, to: cdn, flow: true }
+  - { from: r53, to: cdn, style: dashed }
+  - { from: waf, to: cdn, style: dashed }
+  - { from: cdn, to: web, flow: true }
+  # 4 · routing and authentication
+  - { from: cdn, to: apigw, flow: true }
+  - { from: apigw, to: cognito }
+  - { from: edge, to: cognito, style: dashed }
+  # 5 · orchestration and session log
+  - { from: apigw, to: orch, flow: true }
+  - { from: orch, to: sessions }
+  - { from: orch, to: rag, flow: true }
+  # 6 · RAG query and LLM inference
+  - { from: rag, to: ssm }
+  - { from: rag, to: aurora }
+  - { from: rag, to: llm, flow: true }
+  # 1 · daily ingestion
+  - { from: sched1, to: pipeline, style: dashed }
+  - { from: corp, to: pipeline }
+  - { from: pipeline, to: kb }
+  # 2 · embeddings
+  - { from: sched2, to: sfn, style: dashed }
+  - { from: kb, to: batch }
+  - { from: batch, to: langchain }
+  - { from: langchain, to: aurora }
+notes:
+  - { target: pipeline, text: "Daily data ingestion. EventBridge Scheduler triggers an ECS task every day to fetch data files with a predefined format and creation date from the corporate storage, then copies them to an S3 bucket partitioned by date." }
+  - { target: sfn, text: "Processing and embeddings. EventBridge Scheduler starts a Step Functions workflow in two steps: a SageMaker BatchTransform job extracts the information from the documents and saves it to S3, then an ECS task generates the embeddings and stores them in Aurora." }
+  - { target: web, text: "Web frontend delivery and security. A static website is hosted on S3 behind a CloudFront distribution, with its DNS name registered in Route 53. AWS WAF inspects every request as an additional layer of security." }
+  - { target: cognito, text: "User routing and authentication. API Gateway authenticates users and routes requests to a Lambda function. Authentication is handled by a Cognito user pool, with the help of a Lambda@Edge function." }
+  - { target: sessions, text: "Orchestration and session log. The orchestrator Lambda is ultimately responsible for returning the response to the client. It first records the session in DynamoDB, then invokes the Retrieval-Augmented Generation (RAG) Lambda." }
+  - { target: ssm, text: "RAG query and agent inference. The RAG Lambda reads the API token from SSM Parameter Store, retrieves the relevant embeddings from Aurora and sends them with the user's query to Amazon Bedrock AgentCore, which runs the agent and the LLM. The answer goes back to the orchestrator." }
+legend:
+  - { style: solid, label: Request / data path }
+  - { style: dashed, label: "Trigger or control" }
+steps:
+  - { title: 1 · Daily ingestion, show: [sched1, corp, pipeline, kb] }
+  - { title: 2 · Embeddings, show: [sched2, kb, sfn, batch, langchain, aurora] }
+  - { title: 3 · Web delivery, show: [sales, r53, waf, cdn, web] }
+  - { title: 4 · Routing and auth, show: [cdn, apigw, cognito, edge] }
+  - { title: 5 · Orchestration, show: [apigw, orch, sessions, rag] }
+  - { title: 6 · RAG and inference, show: [orch, rag, ssm, aurora, llm] }
+variants:
+  # phone version: one column, only the chat path (hiding a group hides what is inside it)
+  narrow:
+    hide: [r53, waf, edge, sessions, ssm, web, cognito, corp, g-data]
+    nodes:
+      sales: { label: Sales rep }
+```
+
+</CodeBlock>
+
+Y con la CLI, dgm, se valida y se renderiza:
+
+<CodeBlock title="terminal" lang="powershell" maxHeight="16rem">
+```powershell
+dgm validate examples/aws-genai-chatbot.diagram.yaml                                          # errores y advertencias, con sugerencias
+dgmrender examples/aws-genai-chatbot.diagram.yaml -o examples/out/aws-genai-chatbot.svg       # SVG interactivo
+dgm render examples/aws-genai-chatbot.diagram.yaml -o examples/out/aws-genai-chatbot.png
+```
+</CodeBlock>
+
+Lo que produce como resultado el siguiente diagrama:
+
+<Diagram name="declarative-diagrams/aws-genai-chatbot" caption="Figura 1. Arquitectura en AWS del chatbot RAG, renderizada a partir del YAML anterior." />
+
+El SVG interactivo resalta nodos y conexiones al pasar el cursor, anima los flujos y permite explicar la arquitectura paso a paso, revelando un componente cada vez. Es lo que más uso cuando presento una solución.
+
+## Un estilo propio para mis diagramas interactivos
+
+Aquí está la parte que más me ilusiona. Quería que los diagramas de mi blog se vieran como mi blog: los mismos colores, la misma tipografía y el mismo modo claro u oscuro. Y quería que fueran interactivos, no una imagen plana.
+
+Para eso, cada tema se define con un color semilla y el resto de la paleta se genera automáticamente, con verificación de contraste para que el texto siempre se lea. Un tema se escribe en un archivo YAML pequeño:
+
+<CodeBlock title="Definición de un tema" lang="yml" maxHeight="20rem">
+  ```yml
+  name: mi-blog
+  extends: distill
+  seed: { accent: "#5f6f1f", flow: "#c98a1b", neutral: "#f1f0e4" }
+  dark:  { accent: "#a9bb62" }
+  ```
+</CodeBlock>
+
+Con eso, un diagrama se incrusta en un post MDX con una línea:
+
+<CodeBlock title="Incrustación en Astro / React" lang="TypeScript" maxHeight="28rem">
+    ```typescript
+    import arch from "./arquitectura.diagram.yaml";
+    import { Diagram } from "@declarative-diagrams/react";
+    
+    <Diagram client:visible svg={arch} caption="Figura 1. Arquitectura de referencia." />
+    ```
+</CodeBlock>
+
+El diagrama sigue el modo del sitio, y el resaltado, el flujo animado y el revelado paso a paso funcionan dentro del post. Para un artículo técnico, eso permite explicar un flujo sin pedirle al lector que imagine nada.
+
+Además, incluí siete temas base (`distill`, `olive`, `azure`, `aws`, `orange`, `slate`, `mono`), así que puedo empezar desde uno y ajustar.
+
+## Cómo está hecho por dentro
+Es un monorepo de npm workspaces en TypeScript. Cada paquete tiene una responsabilidad:
+
+| Paquete | Qué hace |
+| :--- | :--- |
+| **`core`** | La especificación (validada con Zod), el layout con ELK, el render a SVG, los temas, los iconos y la exportación a PNG |
+| **`cli`** | La herramienta `dgm` |
+| **`react`** | El componente `<Diagram />` y un plugin de Vite para MDX |
+| **`mcp`** | El servidor MCP para agentes de IA |
+| **`skills/diagram-author`** | La skill con el flujo de trabajo y los patrones de AWS y Azure |
+| **`site-demo`** | Un sitio Astro que aloja el playground |
+
+
+## El recorrido de renderizar un diagrama
+
+<Diagram name="declarative-diagrams/render-pipeline" stagger={1.5} caption="Figura 2. El recorrido de un diagrama: del YAML validado al SVG, y de ahí al PNG." />
+
+## Iconos
+Los de Lucide (más de 2.400) vienen incluidos. Los de Azure y AWS no los distribuyo: cada usuario descarga los paquetes de los sitios oficiales y los importa con dgm icons update. No quería redistribuir activos de terceros, y el proyecto está pensado así desde el principio.
+
+## Listo ser asistido por IA
+El servidor MCP expone herramientas como `dgm_search_icons`, `dgm_validate_diagram` y `dgm_render_diagram`. El asistente consulta la guía, busca los iconos (sin inventarlos), escribe la especificación, la valida, renderiza un PNG, lo mira, corrige y lo guarda.
+
+Ese último paso, mirar el resultado, es el que importa. Un modelo que escribe YAML a ciegas comete errores de layout que no ve. Con el PNG delante, los corrige. Hay además un agente para `OpenCode (diagram-specialist)` que encapsula todo el proceso y acepta texto, archivos del proyecto o una imagen de referencia, como una captura del portal o un boceto a mano.
+
+## Seguridad
+
+Cuando un asistente escribe archivos, hay que tratar el contenido con cuidado. El proyecto tiene un modelo de seguridad explícito: los valores de tema se validan antes de entrar en el SVG, los iconos pasan por una lista blanca que bloquea scripts y enlaces externos, y el servidor MCP solo escribe dentro de la raíz del proyecto sin reemplazar archivos existentes. El SVG interactivo incluye un pequeño script, así que si lo sirves en tu web, hazlo desde tu propio origen, o usa `--static` si necesitas un archivo sin scripts.
+
+## Pruébalo
+- *Playground (sin instalar nada):* [https://vicentej20.github.io/declarative-diagrams/](https://vicentej20.github.io/declarative-diagrams/). Edita el YAML, cambia de tema, exporta SVG o PNG y comparte enlaces. Los ejemplos de AWS y Azure están marcados con una estrella y no pueden ser editados debido a los iconos.
+- *Código:* [https://github.com/VicenteJ20/declarative-diagrams](https://github.com/VicenteJ20/declarative-diagrams) (licencia MIT).
+- *En local:* npm install && npm run build con Node 22 o superior. Todavía no está publicado en npm.
