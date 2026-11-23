@@ -230,6 +230,11 @@ const t =
         min-width: var(--dgm-min, 640px);
         margin: 0 auto;
     }
+    /* every inlined SVG ships a global <style>; a later diagram's `.cont.even rect { fill }` would otherwise tint the
+       official-look (AWS/Azure) containers, which must stay transparent. Higher specificity keeps them see-through. */
+    svg.dgm.look-official .cont rect {
+        fill: none;
+    }
     /* the SVG's own mini stepper is replaced by the HTML controls */
     .dgm-fig[data-has-steps] svg.dgm .stepper,
     dialog.dgm-dialog svg.dgm .stepper {
